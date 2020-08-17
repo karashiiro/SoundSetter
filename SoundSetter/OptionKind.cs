@@ -2,7 +2,7 @@
 {
     public enum OptionKind : ulong
     {
-        Master,
+        Master = 23,
         Bgm,
         SoundEffects,
         Voice,
@@ -22,6 +22,6 @@
         AmbientSoundsMuted,
         PerformanceMuted,
 
-        EqualizerMode,
+        EqualizerMode = 49,
     }
 }

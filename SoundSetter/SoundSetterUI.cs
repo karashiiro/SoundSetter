@@ -30,7 +30,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var masterMuted = this.vc.MasterMuted.GetValue();
-            if (ImGui.Button(masterMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(masterMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.MasterMuted.SetValue(!masterMuted);
             }
@@ -44,7 +44,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var bgmMuted = this.vc.BgmMuted.GetValue();
-            if (ImGui.Button(bgmMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(bgmMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.BgmMuted.SetValue(!bgmMuted);
             }
@@ -58,7 +58,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var soundEffectsMuted = this.vc.SoundEffectsMuted.GetValue();
-            if (ImGui.Button(soundEffectsMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(soundEffectsMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.SoundEffectsMuted.SetValue(!soundEffectsMuted);
             }
@@ -72,7 +72,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var voiceMuted = this.vc.VoiceMuted.GetValue();
-            if (ImGui.Button(voiceMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(voiceMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.VoiceMuted.SetValue(!voiceMuted);
             }
@@ -86,7 +86,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var systemSoundsMuted = this.vc.SystemSoundsMuted.GetValue();
-            if (ImGui.Button(systemSoundsMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(systemSoundsMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.SystemSoundsMuted.SetValue(!systemSoundsMuted);
             }
@@ -100,7 +100,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var ambientSoundsMuted = this.vc.AmbientSoundsMuted.GetValue();
-            if (ImGui.Button(ambientSoundsMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(ambientSoundsMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.AmbientSoundsMuted.SetValue(!ambientSoundsMuted);
             }
@@ -114,7 +114,7 @@ namespace SoundSetter
 
             ImGui.PushFont(UiBuilder.IconFont);
             var performanceMuted = this.vc.PerformanceMuted.GetValue();
-            if (ImGui.Button(performanceMuted ? volumeOn : volumeOff, buttonSize))
+            if (ImGui.Button(performanceMuted ? volumeOff : volumeOn, buttonSize))
             {
                 this.vc.PerformanceMuted.SetValue(!performanceMuted);
             }
