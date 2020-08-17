@@ -9,3 +9,9 @@ A Dalamud plugin that allows volume control from anywhere, including gpose and c
 ## Screenshots
 ![Screenshot](https://raw.githubusercontent.com/karashiiro/SoundSetter/master/Assets/0.png)
 ![Screenshot](https://raw.githubusercontent.com/karashiiro/SoundSetter/master/Assets/1.png)
+
+## Remarks
+
+It's disabled on the title screen due to laziness. The function I use to hook the configuration options takes a pointer to the base of the object
+as its first argument, and I don't know how to get that pointer without waiting for the function to be called. Luckily, it's called automatically
+when the player logs in, for one reason or another. So, I just take the address down once it's called on login, and disable it on the title screen.
