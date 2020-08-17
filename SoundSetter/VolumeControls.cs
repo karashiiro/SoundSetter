@@ -45,7 +45,9 @@ namespace SoundSetter
                 this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, new SetOptionDelegate((baseAddress, kind, value, unknown) =>
                 {
                     if (MasterVolume == null) InitializeOptions(setOption, baseAddress);
+#if DEBUG
                     PluginLog.Log($"{baseAddress}, {kind}, {value}, {unknown}");
+#endif
                     return this.setOptionHook.Original(baseAddress, kind, value, unknown);
                 }));
                 this.setOptionHook.Enable();

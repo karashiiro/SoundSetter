@@ -1,4 +1,6 @@
-﻿namespace SoundSetter
+﻿using System;
+
+namespace SoundSetter
 {
     public static class VirtualKey
     {
@@ -86,6 +88,16 @@
             VkX,
             VkY,
             VkZ,
+        }
+
+        public static int EnumToIndex(Enum value)
+        {
+            return Array.IndexOf(Names, value.ToString().Substring(2));
+        }
+
+        public static Enum IndexToEnum(int i)
+        {
+            return (Enum)System.Enum.Parse(typeof(Enum), $"Vk{Names[i]}");
         }
     }
 }

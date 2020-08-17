@@ -20,6 +20,7 @@ namespace SoundSetter
             this.pluginInterface = pluginInterface;
 
             this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
+            this.config.Initialize(this.pluginInterface);
 
             this.vc = new VolumeControls(this.pluginInterface.TargetModuleScanner);
 
@@ -35,6 +36,9 @@ namespace SoundSetter
         private bool keysDown;
         private void OnTick()
         {
+            // We don't want to open the UI before the player loads, that leaves the options uninitialized.
+            if (this.pluginInterface.ClientState.LocalPlayer == null) return;
+
             if (this.pluginInterface.ClientState.KeyState[(int)this.config.Keybind[0]] &&
                 this.pluginInterface.ClientState.KeyState[(int)this.config.Keybind[1]])
             {
