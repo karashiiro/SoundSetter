@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using static SoundSetter.SetOption;
+using static SoundSetter.OptionInternals.SetOption;
 
-namespace SoundSetter
+namespace SoundSetter.OptionInternals
 {
     public class BooleanOption : Option<bool>
     {

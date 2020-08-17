@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace SoundSetter
+namespace SoundSetter.OptionInternals
 {
     public class EqualizerModeOption : Option<EqualizerMode.Enum>
     {

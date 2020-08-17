@@ -1,4 +1,4 @@
-﻿namespace SoundSetter
+﻿namespace SoundSetter.OptionInternals
 {
     public enum OptionKind : ulong
     {

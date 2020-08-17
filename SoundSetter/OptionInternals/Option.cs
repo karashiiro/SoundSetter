@@ -1,7 +1,7 @@
 ﻿using System;
-using static SoundSetter.SetOption;
+using static SoundSetter.OptionInternals.SetOption;
 
-namespace SoundSetter
+namespace SoundSetter.OptionInternals
 {
     public abstract class Option<TManagedValue> where TManagedValue : struct
     {

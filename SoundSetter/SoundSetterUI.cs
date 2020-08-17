@@ -1,19 +1,22 @@
-﻿using System.Numerics;
+﻿using System.Linq;
+using System.Numerics;
 using Dalamud.Interface;
-using Dalamud.Plugin;
 using ImGuiNET;
+using SoundSetter.OptionInternals;
 
 namespace SoundSetter
 {
     public class SoundSetterUi
     {
+        private readonly Configuration config;
         private readonly VolumeControls vc;
 
         public bool IsVisible { get; set; }
 
-        public SoundSetterUi(VolumeControls vc)
+        public SoundSetterUi(VolumeControls vc, Configuration config)
         {
             this.vc = vc;
+            this.config = config;
         }
 
         public void Draw()
@@ -26,6 +29,22 @@ namespace SoundSetter
             var pVisible = IsVisible;
             ImGui.Begin("SoundSetter Configuration", ref pVisible, ImGuiWindowFlags.AlwaysAutoResize);
             IsVisible = pVisible;
+
+            ImGui.Text("Plugin Settings");
+
+            var kItem1 = (int)this.config.Keybind[0];
+            var kItem2 = (int)this.config.Keybind[1];
+            if (ImGui.Combo("Keybind#SoundSetterKeybind1", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
+            {
+                this.config.Keybind[0] = (VirtualKey.Enum)kItem1;
+                this.config.Save();
+            }
+            ImGui.SameLine();
+            if (ImGui.Combo("#SoundSetterKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
+            {
+                this.config.Keybind[1] = (VirtualKey.Enum)kItem2;
+                this.config.Save();
+            }
 
             ImGui.Text("Volume Settings");
 

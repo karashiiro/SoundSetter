@@ -1,4 +1,4 @@
-﻿namespace SoundSetter
+﻿namespace SoundSetter.OptionInternals
 {
     public static class EqualizerMode
     {

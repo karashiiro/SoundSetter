@@ -3,7 +3,8 @@ using System;
 using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
-using static SoundSetter.SetOption;
+using SoundSetter.OptionInternals;
+using static SoundSetter.OptionInternals.SetOption;
 
 namespace SoundSetter
 {
