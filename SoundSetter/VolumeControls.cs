@@ -11,7 +11,7 @@ namespace SoundSetter
     {
         private readonly Hook<SetOptionDelegate> setOptionHook;
 
-        public ByteOption Master { get; private set; }
+        public ByteOption MasterVolume { get; private set; }
         public ByteOption Bgm { get; private set; }
         public ByteOption SoundEffects { get; private set; }
         public ByteOption Voice { get; private set; }
@@ -23,7 +23,7 @@ namespace SoundSetter
         public ByteOption Party { get; private set; }
         public ByteOption OtherPCs { get; private set; }
 
-        public BooleanOption MasterMuted { get; private set; }
+        public BooleanOption MasterVolumeMuted { get; private set; }
         public BooleanOption BgmMuted { get; private set; }
         public BooleanOption SoundEffectsMuted { get; private set; }
         public BooleanOption VoiceMuted { get; private set; }
@@ -41,7 +41,7 @@ namespace SoundSetter
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
                 this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, new SetOptionDelegate((baseAddress, kind, value, unknown) =>
                 {
-                    if (Master == null) InitializeOptions(setOption, baseAddress);
+                    if (MasterVolume == null) InitializeOptions(setOption, baseAddress);
                     PluginLog.Log($"{baseAddress}, {kind}, {value}, {unknown}");
                     return this.setOptionHook.Original(baseAddress, kind, value, unknown);
                 }));
@@ -58,7 +58,7 @@ namespace SoundSetter
             var byteOptionFactory = ByteOption.CreateFactory(configuration, setOption);
             var booleanOptionFactory = BooleanOption.CreateFactory(configuration, setOption);
 
-            Master = byteOptionFactory(OptionKind.Master, OptionOffsets.Master);
+            MasterVolume = byteOptionFactory(OptionKind.Master, OptionOffsets.MasterVolume);
             Bgm = byteOptionFactory(OptionKind.Bgm, OptionOffsets.Bgm);
             SoundEffects = byteOptionFactory(OptionKind.SoundEffects, OptionOffsets.SoundEffects);
             Voice = byteOptionFactory(OptionKind.Voice, OptionOffsets.Voice);
@@ -70,7 +70,7 @@ namespace SoundSetter
             Party = byteOptionFactory(OptionKind.Party, OptionOffsets.Party);
             OtherPCs = byteOptionFactory(OptionKind.OtherPCs, OptionOffsets.OtherPCs);
 
-            MasterMuted = booleanOptionFactory(OptionKind.MasterMuted, OptionOffsets.MasterMuted);
+            MasterVolumeMuted = booleanOptionFactory(OptionKind.MasterMuted, OptionOffsets.MasterVolumeMuted);
             BgmMuted = booleanOptionFactory(OptionKind.BgmMuted, OptionOffsets.BgmMuted);
             SoundEffectsMuted = booleanOptionFactory(OptionKind.SoundEffectsMuted, OptionOffsets.SoundEffectsMuted);
             VoiceMuted = booleanOptionFactory(OptionKind.VoiceMuted, OptionOffsets.VoiceMuted);

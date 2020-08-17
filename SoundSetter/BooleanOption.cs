@@ -8,7 +8,7 @@ namespace SoundSetter
     {
         public override bool GetValue()
         {
-            return Marshal.ReadByte(BaseAddress, Offset) == 1;
+            return Marshal.ReadByte(BaseAddress, Offset) != 0;
         }
 
         public override void SetValue(bool value)

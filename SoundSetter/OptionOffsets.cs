@@ -2,7 +2,7 @@
 {
     public static class OptionOffsets
     {
-        public const int Master = 44112;
+        public const int MasterVolume = 44112;
         public const int Bgm = 44128;
         public const int SoundEffects = 44144;
         public const int Voice = 44160;
@@ -14,7 +14,7 @@
         public const int Party = 44240;
         public const int OtherPCs = 44256;
 
-        public const int MasterMuted = 44272;
+        public const int MasterVolumeMuted = 44272;
         public const int BgmMuted = 44288;
         public const int SoundEffectsMuted = 44304;
         public const int VoiceMuted = 44320;
