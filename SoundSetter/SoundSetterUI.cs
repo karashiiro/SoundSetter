@@ -29,118 +29,125 @@ namespace SoundSetter
             IsVisible = pVisible;
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.MasterMuted ? volumeOn : volumeOff, buttonSize))
+            var masterMuted = this.vc.MasterMuted.GetValue();
+            if (ImGui.Button(masterMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.MasterMuted = !this.vc.MasterMuted;
+                this.vc.MasterMuted.SetValue(!masterMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var master = this.vc.Master;
+            var master = (int)this.vc.Master.GetValue();
             if (ImGui.SliderInt("Master Volume", ref master, 0, 100))
             {
-                this.vc.Master = master;
+                this.vc.Master.SetValue((byte)master);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.BgmMuted ? volumeOn : volumeOff, buttonSize))
+            var bgmMuted = this.vc.BgmMuted.GetValue();
+            if (ImGui.Button(bgmMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.BgmMuted = !this.vc.BgmMuted;
+                this.vc.BgmMuted.SetValue(!bgmMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var bgm = this.vc.Bgm;
+            var bgm = (int)this.vc.Bgm.GetValue();
             if (ImGui.SliderInt("BGM", ref bgm, 0, 100))
             {
-                this.vc.Bgm = bgm;
+                this.vc.Bgm.SetValue((byte)bgm);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.SoundEffectsMuted ? volumeOn : volumeOff, buttonSize))
+            var soundEffectsMuted = this.vc.SoundEffectsMuted.GetValue();
+            if (ImGui.Button(soundEffectsMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.SoundEffectsMuted = !this.vc.SoundEffectsMuted;
+                this.vc.SoundEffectsMuted.SetValue(!soundEffectsMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var soundEffects = this.vc.SoundEffects;
+            var soundEffects = (int)this.vc.SoundEffects.GetValue();
             if (ImGui.SliderInt("Sound Effects", ref soundEffects, 0, 100))
             {
-                this.vc.SoundEffects = soundEffects;
+                this.vc.SoundEffects.SetValue((byte)soundEffects);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.VoiceMuted ? volumeOn : volumeOff, buttonSize))
+            var voiceMuted = this.vc.VoiceMuted.GetValue();
+            if (ImGui.Button(voiceMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.VoiceMuted = !this.vc.VoiceMuted;
+                this.vc.VoiceMuted.SetValue(!voiceMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var voice = this.vc.Voice;
+            var voice = (int)this.vc.Voice.GetValue();
             if (ImGui.SliderInt("Voice", ref voice, 0, 100))
             {
-                this.vc.Voice = voice;
+                this.vc.Voice.SetValue((byte)voice);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.SystemSoundsMuted ? volumeOn : volumeOff, buttonSize))
+            var systemSoundsMuted = this.vc.SystemSoundsMuted.GetValue();
+            if (ImGui.Button(systemSoundsMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.SystemSoundsMuted = !this.vc.SystemSoundsMuted;
+                this.vc.SystemSoundsMuted.SetValue(!systemSoundsMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var systemSounds = this.vc.SystemSounds;
+            var systemSounds = (int)this.vc.SystemSounds.GetValue();
             if (ImGui.SliderInt("System Sounds", ref systemSounds, 0, 100))
             {
-                this.vc.SystemSounds = systemSounds;
+                this.vc.SystemSounds.SetValue((byte)systemSounds);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.AmbientSoundsMuted ? volumeOn : volumeOff, buttonSize))
+            var ambientSoundsMuted = this.vc.AmbientSoundsMuted.GetValue();
+            if (ImGui.Button(ambientSoundsMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.AmbientSoundsMuted = !this.vc.AmbientSoundsMuted;
+                this.vc.AmbientSoundsMuted.SetValue(!ambientSoundsMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var ambientSounds = this.vc.AmbientSounds;
+            var ambientSounds = (int)this.vc.AmbientSounds.GetValue();
             if (ImGui.SliderInt("Ambient Sounds", ref ambientSounds, 0, 100))
             {
-                this.vc.AmbientSounds = ambientSounds;
+                this.vc.AmbientSounds.SetValue((byte)ambientSounds);
             }
 
             ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(this.vc.PerformanceMuted ? volumeOn : volumeOff, buttonSize))
+            var performanceMuted = this.vc.PerformanceMuted.GetValue();
+            if (ImGui.Button(performanceMuted ? volumeOn : volumeOff, buttonSize))
             {
-                this.vc.PerformanceMuted = !this.vc.PerformanceMuted;
+                this.vc.PerformanceMuted.SetValue(!performanceMuted);
             }
             ImGui.PopFont();
             ImGui.SameLine();
-            var performance = this.vc.Performance;
+            var performance = (int)this.vc.Performance.GetValue();
             if (ImGui.SliderInt("Performance", ref performance, 0, 100))
             {
-                this.vc.Performance = performance;
+                this.vc.Performance.SetValue((byte)performance);
             }
 
-            var self = this.vc.Self;
+            var self = (int)this.vc.Self.GetValue();
             if (ImGui.SliderInt("Self", ref self, 0, 100))
             {
-                this.vc.Self = self;
+                this.vc.Self.SetValue((byte)self);
             }
 
-            var party = this.vc.Party;
+            var party = (int)this.vc.Party.GetValue();
             if (ImGui.SliderInt("Party", ref party, 0, 100))
             {
-                this.vc.Party = party;
+                this.vc.Party.SetValue((byte)party);
             }
 
-            var others = this.vc.OtherPCs;
-            if (ImGui.SliderInt("OtherPCs", ref others, 0, 100))
+            var others = (int)this.vc.OtherPCs.GetValue();
+            if (ImGui.SliderInt("Other PCs", ref others, 0, 100))
             {
-                this.vc.OtherPCs = others;
+                this.vc.OtherPCs.SetValue((byte)others);
             }
 
-            var eqMode = (int)this.vc.EqualizerMode;
+            var eqMode = (int)this.vc.EqualizerMode.GetValue();
             if (ImGui.Combo("Equalizer Mode", ref eqMode, EqualizerMode.Names, EqualizerMode.Names.Length))
             {
-                this.vc.EqualizerMode = (EqualizerMode.Enum)eqMode;
+                this.vc.EqualizerMode.SetValue((EqualizerMode.Enum)eqMode);
             }
 
             ImGui.End();

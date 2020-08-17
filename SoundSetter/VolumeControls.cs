@@ -1,178 +1,98 @@
 ﻿using Dalamud.Game;
+using System;
+using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+using static SoundSetter.SetOption;
 
 namespace SoundSetter
 {
     public class VolumeControls : IDisposable
     {
-        private const int MasterVolumeOffset = 34048;
-        private const int BgmOffset = 34104;
-        private const int SoundEffectsOffset = 34160;
-        private const int VoiceOffset = 34216;
-        private const int SystemSoundsOffset = 34328;
-        private const int AmbientSoundsOffset = 34272;
-        private const int PerformanceOffset = 34384;
+        private readonly Hook<SetOptionDelegate> setOptionHook;
 
-        private const int SelfOffset = 34440;
-        private const int PartyOffset = 34496;
-        private const int OtherPCsOffset = 34552;
+        private IntPtr configuration;
 
-        private const int MasterVolumeMutedOffset = 34608;
-        private const int BgmMutedOffset = 34664;
-        private const int SoundEffectsMutedOffset = 34720;
-        private const int VoiceMutedOffset = 34776;
-        private const int SystemSoundsMutedOffset = 34888;
-        private const int AmbientSoundsMutedOffset = 34832;
-        private const int PerformanceMutedOffset = 34944;
+        public ByteOption Master { get; }
+        public ByteOption Bgm { get; }
+        public ByteOption SoundEffects { get; }
+        public ByteOption Voice { get; }
+        public ByteOption SystemSounds { get; }
+        public ByteOption AmbientSounds { get; }
+        public ByteOption Performance { get; }
 
-        private const int EqualizerModeOffset = 35336;
+        public ByteOption Self { get; }
+        public ByteOption Party { get; }
+        public ByteOption OtherPCs { get; }
 
-        private delegate IntPtr SetSoundOptionDelegate(IntPtr address, ulong value, IntPtr p3, float p4);
-        private Hook<SetSoundOptionDelegate> setSoundOptionHook;
+        public BooleanOption MasterMuted { get; }
+        public BooleanOption BgmMuted { get; }
+        public BooleanOption SoundEffectsMuted { get; }
+        public BooleanOption VoiceMuted { get; }
+        public BooleanOption SystemSoundsMuted { get; }
+        public BooleanOption AmbientSoundsMuted { get; }
+        public BooleanOption PerformanceMuted { get; }
 
-        public int Master { get; set; }
-        public int Bgm { get; set; }
-        public int SoundEffects { get; set; }
-        public int Voice { get; set; }
-        public int SystemSounds { get; set; }
-        public int AmbientSounds { get; set; }
-        public int Performance { get; set; }
-
-        public int Self { get; set; }
-        public int Party { get; set; }
-        public int OtherPCs { get; set; }
-
-        public bool MasterMuted { get; set; }
-        public bool BgmMuted { get; set; }
-        public bool SoundEffectsMuted { get; set; }
-        public bool VoiceMuted { get; set; }
-        public bool SystemSoundsMuted { get; set; }
-        public bool AmbientSoundsMuted { get; set; }
-        public bool PerformanceMuted { get; set; }
-
-        public EqualizerMode.Enum EqualizerMode { get; set; }
+        public EqualizerModeOption EqualizerMode { get; }
 
         public VolumeControls(SigScanner scanner)
         {
-            HookVolume(scanner);
-        }
-
-        private void HookVolume(SigScanner scanner)
-        {
+            SetOptionDelegate setOption;
             try
             {
-                var setSoundOption = scanner.ScanText("48 83 EC 28 44 8B 49 ?? 44 8B 51 ?? 41 3B D1 72 28 3B 51 ?? 77 23");
-                this.setSoundOptionHook = new Hook<SetSoundOptionDelegate>(setSoundOption, (SetSoundOptionDelegate)OnSetSoundOption);
-                this.setSoundOptionHook.Enable();
-                PluginLog.Log($"SetSoundOption found at 0x{setSoundOption.ToString("X")}");
+                var setConfigurationPtr = scanner.ScanText("89 54 24 ?? 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
+                setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
+                this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, new SetOptionDelegate(
+                    (baseAddress, kind, value, unknown) =>
+                    {
+                        this.configuration = baseAddress;
+                        PluginLog.Log($"0x{baseAddress.ToString("X")} {kind}, {value}, {unknown}");
+                        return this.setOptionHook.Original(baseAddress, kind, value, unknown);
+                    }));
+                this.setOptionHook.Enable();
             }
             catch (Exception e)
             {
-                PluginLog.LogError($"Failed to hook volume method! Full message:\n{e}");
+                PluginLog.LogError($"Failed to hook configuration set method! Full error:\n{e}");
+                return;
             }
-        }
 
-        private bool readAllOnce;
-        private IntPtr OnSetSoundOption(IntPtr address, ulong value, IntPtr p3, float p4)
-        {
-            PluginLog.Log($"Hit! Args: {address}, {value}, {p3}, {p4}");
-            LoadBaseConfigAddress(address);
-            if (!this.readAllOnce)
+            var byteOptionFactory = ByteOption.CreateFactory(this.configuration, setOption);
+            var booleanOptionFactory = BooleanOption.CreateFactory(this.configuration, setOption);
+
+            Master = byteOptionFactory(OptionKind.Master, OptionOffsets.Master);
+            Bgm = byteOptionFactory(OptionKind.Bgm, OptionOffsets.Bgm);
+            SoundEffects = byteOptionFactory(OptionKind.SoundEffects, OptionOffsets.SoundEffects);
+            Voice = byteOptionFactory(OptionKind.Voice, OptionOffsets.Voice);
+            SystemSounds = byteOptionFactory(OptionKind.SystemSounds, OptionOffsets.SystemSounds);
+            AmbientSounds = byteOptionFactory(OptionKind.AmbientSounds, OptionOffsets.AmbientSounds);
+            Performance = byteOptionFactory(OptionKind.Performance, OptionOffsets.Performance);
+
+            Self = byteOptionFactory(OptionKind.Self, OptionOffsets.Self);
+            Party = byteOptionFactory(OptionKind.Party, OptionOffsets.Party);
+            OtherPCs = byteOptionFactory(OptionKind.OtherPCs, OptionOffsets.OtherPCs);
+
+            MasterMuted = booleanOptionFactory(OptionKind.MasterMuted, OptionOffsets.MasterMuted);
+            BgmMuted = booleanOptionFactory(OptionKind.BgmMuted, OptionOffsets.BgmMuted);
+            SoundEffectsMuted = booleanOptionFactory(OptionKind.SoundEffectsMuted, OptionOffsets.SoundEffectsMuted);
+            VoiceMuted = booleanOptionFactory(OptionKind.VoiceMuted, OptionOffsets.VoiceMuted);
+            SystemSoundsMuted = booleanOptionFactory(OptionKind.SystemSoundsMuted, OptionOffsets.SystemSoundsMuted);
+            AmbientSoundsMuted = booleanOptionFactory(OptionKind.AmbientSoundsMuted, OptionOffsets.AmbientSoundsMuted);
+            PerformanceMuted = booleanOptionFactory(OptionKind.PerformanceMuted, OptionOffsets.PerformanceMuted);
+
+            EqualizerMode = new EqualizerModeOption
             {
-                // Initializes the plugin state
-                ReadAllOptions();
-                this.readAllOnce = true;
-            }
-            ReadNewOption(address, value);
-            return this.setSoundOptionHook.Original(address, value, p3, p4);
-        }
-
-        private IntPtr BaseConfigAddress { get; set; }
-        private readonly List<IntPtr> addresses = new List<IntPtr>();
-        private void LoadBaseConfigAddress(IntPtr next)
-        {
-            if (this.addresses.Count == 20) return;
-            this.addresses.Add(next);
-            BaseConfigAddress = this.addresses // Get the most frequent address in the list
-                .GroupBy(x => x)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .First();
-        }
-
-        private void ReadAllOptions()
-        {
-            Master = Marshal.ReadByte(BaseConfigAddress + MasterVolumeOffset);
-            Bgm = Marshal.ReadByte(BaseConfigAddress + BgmOffset);
-            SoundEffects = Marshal.ReadByte(BaseConfigAddress + SoundEffectsOffset);
-            Voice = Marshal.ReadByte(BaseConfigAddress + VoiceOffset);
-            SystemSounds = Marshal.ReadByte(BaseConfigAddress + SystemSoundsOffset);
-            AmbientSounds = Marshal.ReadByte(BaseConfigAddress + AmbientSoundsOffset);
-            Performance = Marshal.ReadByte(BaseConfigAddress + PerformanceOffset);
-            Self = Marshal.ReadByte(BaseConfigAddress + SelfOffset);
-            Party = Marshal.ReadByte(BaseConfigAddress + PartyOffset);
-            OtherPCs = Marshal.ReadByte(BaseConfigAddress + OtherPCsOffset);
-
-            MasterMuted = Marshal.ReadByte(BaseConfigAddress + MasterVolumeMutedOffset) == 0;
-            BgmMuted = Marshal.ReadByte(BaseConfigAddress + BgmMutedOffset) == 0;
-            SoundEffectsMuted = Marshal.ReadByte(BaseConfigAddress + SoundEffectsMutedOffset) == 0;
-            VoiceMuted = Marshal.ReadByte(BaseConfigAddress + VoiceMutedOffset) == 0;
-            SystemSoundsMuted = Marshal.ReadByte(BaseConfigAddress + SystemSoundsMutedOffset) == 0;
-            AmbientSoundsMuted = Marshal.ReadByte(BaseConfigAddress + AmbientSoundsMutedOffset) == 0;
-            PerformanceMuted = Marshal.ReadByte(BaseConfigAddress + PerformanceMutedOffset) == 0;
-
-            EqualizerMode = (EqualizerMode.Enum)Marshal.ReadByte(BaseConfigAddress + EqualizerModeOffset);
-        }
-
-        private void ReadNewOption(IntPtr address, ulong value)
-        {
-            if (address == BaseConfigAddress + MasterVolumeOffset)
-                Master = (int)value;
-            else if (address == BaseConfigAddress + BgmOffset)
-                Bgm = (int)value;
-            else if (address == BaseConfigAddress + SoundEffectsOffset)
-                SoundEffects = (int)value;
-            else if (address == BaseConfigAddress + VoiceOffset)
-                Voice = (int)value;
-            else if (address == BaseConfigAddress + SystemSoundsOffset)
-                SystemSounds = (int)value;
-            else if (address == BaseConfigAddress + AmbientSoundsOffset)
-                AmbientSounds = (int)value;
-            else if (address == BaseConfigAddress + PerformanceOffset)
-                Performance = (int)value;
-            else if (address == BaseConfigAddress + SelfOffset)
-                Self = (int)value;
-            else if (address == BaseConfigAddress + PartyOffset)
-                Party = (int)value;
-            else if (address == BaseConfigAddress + OtherPCsOffset)
-                OtherPCs = (int)value;
-            else if (address == BaseConfigAddress + MasterVolumeMutedOffset)
-                MasterMuted = value == 0;
-            else if (address == BaseConfigAddress + BgmMutedOffset)
-                BgmMuted = value == 0;
-            else if (address == BaseConfigAddress + SoundEffectsMutedOffset)
-                SoundEffectsMuted = value == 0;
-            else if (address == BaseConfigAddress + VoiceMutedOffset)
-                VoiceMuted = value == 0;
-            else if (address == BaseConfigAddress + SystemSoundsMutedOffset)
-                SystemSoundsMuted = value == 0;
-            else if (address == BaseConfigAddress + AmbientSoundsMutedOffset)
-                AmbientSoundsMuted = value == 0;
-            else if (address == BaseConfigAddress + PerformanceMutedOffset)
-                PerformanceMuted = value == 0;
-            else if (address == BaseConfigAddress + EqualizerModeOffset)
-                EqualizerMode = (EqualizerMode.Enum)value;
+                BaseAddress = this.configuration,
+                Offset = OptionOffsets.EqualizerMode,
+                Kind = OptionKind.EqualizerMode,
+                SetFunction = setOption,
+            };
         }
 
         public void Dispose()
         {
-            this.setSoundOptionHook?.Disable();
-            this.setSoundOptionHook?.Dispose();
+            this.setOptionHook?.Disable();
+            this.setOptionHook?.Dispose();
         }
     }
 }
