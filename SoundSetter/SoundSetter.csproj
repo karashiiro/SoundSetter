@@ -7,6 +7,12 @@
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="..\SoundSetter.json" Link="SoundSetter.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
