@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Dalamud.Configuration;
+﻿using Dalamud.Configuration;
 using Dalamud.Plugin;
 using Newtonsoft.Json;
 
@@ -9,11 +8,11 @@ namespace SoundSetter
     {
         public int Version { get; set; }
 
-        public List<VirtualKey.Enum> Keybind { get; }
+        public VirtualKey.Enum[] Keybind { get; }
 
         public Configuration()
         {
-            Keybind = new List<VirtualKey.Enum> { VirtualKey.Enum.VkControl, VirtualKey.Enum.VkK };
+            Keybind = new[] { VirtualKey.Enum.VkControl, VirtualKey.Enum.VkK };
         }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;

@@ -47,7 +47,7 @@ namespace SoundSetter
             "Z",
         };
 
-        public enum Enum
+        public enum Enum : byte
         {
             VkShift = 0x10,
             VkControl,
