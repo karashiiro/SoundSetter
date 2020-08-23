@@ -12,6 +12,8 @@ namespace SoundSetter
     {
         private readonly Hook<SetOptionDelegate> setOptionHook;
 
+        public IntPtr BaseAddress { get; private set; }
+
         public ByteOption MasterVolume { get; private set; }
         public ByteOption Bgm { get; private set; }
         public ByteOption SoundEffects { get; private set; }
@@ -44,7 +46,9 @@ namespace SoundSetter
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
                 this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, new SetOptionDelegate((baseAddress, kind, value, unknown) =>
                 {
-                    if (MasterVolume == null) InitializeOptions(setOption, baseAddress);
+                    BaseAddress = baseAddress;
+
+                    if (MasterVolume == null) InitializeOptions(setOption);
 #if DEBUG
                     PluginLog.Log($"{baseAddress}, {kind}, {value}, {unknown}");
 #endif
@@ -58,10 +62,10 @@ namespace SoundSetter
             }
         }
 
-        private void InitializeOptions(SetOptionDelegate setOption, IntPtr baseAddress)
+        private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var byteOptionFactory = ByteOption.CreateFactory(baseAddress, setOption);
-            var booleanOptionFactory = BooleanOption.CreateFactory(baseAddress, setOption);
+            var byteOptionFactory = ByteOption.CreateFactory(BaseAddress, setOption);
+            var booleanOptionFactory = BooleanOption.CreateFactory(BaseAddress, setOption);
 
             MasterVolume = byteOptionFactory(OptionKind.Master, OptionOffsets.MasterVolume);
             Bgm = byteOptionFactory(OptionKind.Bgm, OptionOffsets.Bgm);
@@ -85,7 +89,7 @@ namespace SoundSetter
 
             EqualizerMode = new EqualizerModeOption
             {
-                BaseAddress = baseAddress,
+                BaseAddress = BaseAddress,
                 Offset = OptionOffsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
                 SetFunction = setOption,

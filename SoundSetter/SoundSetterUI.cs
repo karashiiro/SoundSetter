@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -24,11 +25,25 @@ namespace SoundSetter
             if (!IsVisible)
                 return;
 
-            var buttonSize = new Vector2(23, 23);
-            
             var pVisible = IsVisible;
             ImGui.Begin("SoundSetter Configuration", ref pVisible, ImGuiWindowFlags.AlwaysAutoResize);
             IsVisible = pVisible;
+
+            if (this.vc.BaseAddress == IntPtr.Zero)
+            {
+                Fail();
+            }
+            else
+            {
+                Settings();
+            }
+
+            ImGui.End();
+        }
+
+        private void Settings()
+        {
+            var buttonSize = new Vector2(23, 23);
 
             ImGui.Text("Plugin Settings");
 
@@ -175,8 +190,11 @@ namespace SoundSetter
             {
                 this.vc.EqualizerMode.SetValue((EqualizerMode.Enum)eqMode);
             }
+        }
 
-            ImGui.End();
+        private static void Fail()
+        {
+            ImGui.Text("This appears to be your first installation of this plugin.\nPlease manually change a volume setting once in order to initialize the plugin.");
         }
 
         private static string VolumeButtonName(bool state, string internalName)
