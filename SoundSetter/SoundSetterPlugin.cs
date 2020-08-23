@@ -39,8 +39,8 @@ namespace SoundSetter
             // We don't want to open the UI before the player loads, that leaves the options uninitialized.
             if (this.pluginInterface.ClientState.LocalPlayer == null) return;
 
-            if (this.pluginInterface.ClientState.KeyState[(int)this.config.Keybind[0]] &&
-                this.pluginInterface.ClientState.KeyState[(int)this.config.Keybind[1]])
+            if (this.pluginInterface.ClientState.KeyState[(byte)this.config.ModifierKey] &&
+                this.pluginInterface.ClientState.KeyState[(byte)this.config.MajorKey])
             {
                 if (this.keysDown) return;
 
@@ -78,8 +78,6 @@ namespace SoundSetter
             this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.Draw;
 
             this.vc.Dispose();
-
-            this.config.Save();
 
             this.pluginInterface.Dispose();
         }

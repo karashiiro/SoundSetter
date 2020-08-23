@@ -48,17 +48,17 @@ namespace SoundSetter
             ImGui.Text("Plugin Settings");
 
             ImGui.PushItemWidth(100f);
-            var kItem1 = VirtualKey.EnumToIndex(this.config.Keybind[0]);
+            var kItem1 = VirtualKey.EnumToIndex(this.config.ModifierKey);
             if (ImGui.Combo("##SoundSetterKeybind1", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
             {
-                this.config.Keybind[0] = VirtualKey.IndexToEnum(kItem1);
+                this.config.ModifierKey = VirtualKey.IndexToEnum(kItem1);
                 this.config.Save();
             }
             ImGui.SameLine();
-            var kItem2 = VirtualKey.EnumToIndex(this.config.Keybind[1]) - 3;
+            var kItem2 = VirtualKey.EnumToIndex(this.config.MajorKey) - 3;
             if (ImGui.Combo("Keybind##SoundSetterKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
             {
-                this.config.Keybind[1] = VirtualKey.IndexToEnum(kItem2) + 3;
+                this.config.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
                 this.config.Save();
             }
             ImGui.PopItemWidth();
