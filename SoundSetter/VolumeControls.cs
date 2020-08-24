@@ -42,7 +42,7 @@ namespace SoundSetter
             {
                 // I thought I'd need the user to change the settings manually once to get the the base address,
                 // but the function is automatically called once when the player is initialized, so I'll settle for that.
-                var setConfigurationPtr = scanner.ScanText("89 54 24 ?? 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
+                var setConfigurationPtr = scanner.ScanText("89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
                 this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, new SetOptionDelegate((baseAddress, kind, value, unknown) =>
                 {
