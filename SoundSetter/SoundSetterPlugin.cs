@@ -24,6 +24,8 @@ namespace SoundSetter
 
             this.vc = new VolumeControls(this.pluginInterface.TargetModuleScanner);
 
+            this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
+
             this.ui = new SoundSetterUi(this.vc, this.config);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnBuildUi += OnTick;
