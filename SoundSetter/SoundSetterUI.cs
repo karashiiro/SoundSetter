@@ -63,6 +63,32 @@ namespace SoundSetter
             }
             ImGui.PopItemWidth();
 
+            ImGui.Text("Sound Settings");
+
+            var playMusicWhenMounted = this.vc.PlayMusicWhenMounted.GetValue();
+            if (ImGui.Checkbox("Play music when mounted.", ref playMusicWhenMounted))
+            {
+                this.vc.PlayMusicWhenMounted.SetValue(playMusicWhenMounted);
+            }
+
+            var enableNormalBattleMusic = this.vc.EnableNormalBattleMusic.GetValue();
+            if (ImGui.Checkbox("Enable normal battle music.", ref enableNormalBattleMusic))
+            {
+                this.vc.EnableNormalBattleMusic.SetValue(enableNormalBattleMusic);
+            }
+
+            var enableCityStateBGM = this.vc.EnableCityStateBGM.GetValue();
+            if (ImGui.Checkbox("Enable city-state BGM in residential areas.", ref enableCityStateBGM))
+            {
+                this.vc.EnableCityStateBGM.SetValue(enableCityStateBGM);
+            }
+
+            var playSystemSounds = this.vc.PlaySystemSounds.GetValue();
+            if (ImGui.Checkbox("Play system sounds while waiting for Duty Finder.", ref playSystemSounds))
+            {
+                this.vc.PlaySystemSounds.SetValue(playSystemSounds);
+            }
+
             ImGui.Text("Volume Settings");
 
             ImGui.PushFont(UiBuilder.IconFont);

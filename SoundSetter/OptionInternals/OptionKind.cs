@@ -2,6 +2,11 @@
 {
     public enum OptionKind : ulong
     {
+        PlayMusicWhenMounted = 18,
+        EnableNormalBattleMusic,
+        EnableCityStateBGM,
+        PlaySystemSounds,
+
         Master = 23,
         Bgm,
         SoundEffects,

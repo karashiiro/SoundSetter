@@ -14,6 +14,11 @@ namespace SoundSetter
 
         public IntPtr BaseAddress { get; private set; }
 
+        public BooleanOption PlayMusicWhenMounted { get; private set; }
+        public BooleanOption EnableNormalBattleMusic { get; private set; }
+        public BooleanOption EnableCityStateBGM { get; private set; }
+        public BooleanOption PlaySystemSounds { get; private set; }
+
         public ByteOption MasterVolume { get; private set; }
         public ByteOption Bgm { get; private set; }
         public ByteOption SoundEffects { get; private set; }
@@ -66,6 +71,11 @@ namespace SoundSetter
         {
             var byteOptionFactory = ByteOption.CreateFactory(BaseAddress, setOption);
             var booleanOptionFactory = BooleanOption.CreateFactory(BaseAddress, setOption);
+
+            PlayMusicWhenMounted = booleanOptionFactory(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted);
+            EnableNormalBattleMusic = booleanOptionFactory(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic);
+            EnableCityStateBGM = booleanOptionFactory(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM);
+            PlaySystemSounds = booleanOptionFactory(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds);
 
             MasterVolume = byteOptionFactory(OptionKind.Master, OptionOffsets.MasterVolume);
             Bgm = byteOptionFactory(OptionKind.Bgm, OptionOffsets.Bgm);

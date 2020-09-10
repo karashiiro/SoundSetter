@@ -2,6 +2,11 @@
 {
     public static class OptionOffsets
     {
+        public const int PlayMusicWhenMounted = 44032;
+        public const int EnableNormalBattleMusic = 44048;
+        public const int EnableCityStateBGM = 44064;
+        public const int PlaySystemSounds = 44080;
+
         public const int MasterVolume = 44112;
         public const int Bgm = 44128;
         public const int SoundEffects = 44144;
