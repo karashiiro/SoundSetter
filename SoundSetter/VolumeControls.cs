@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
 using SoundSetter.OptionInternals;
-using static SoundSetter.OptionInternals.SetOption;
 
 namespace SoundSetter
 {
@@ -69,33 +68,33 @@ namespace SoundSetter
 
         private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var byteOptionFactory = ByteOption.CreateFactory(BaseAddress, setOption);
-            var booleanOptionFactory = BooleanOption.CreateFactory(BaseAddress, setOption);
+            var makeByteOption = ByteOption.CreateFactory(BaseAddress, setOption);
+            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, setOption);
 
-            PlayMusicWhenMounted = booleanOptionFactory(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted);
-            EnableNormalBattleMusic = booleanOptionFactory(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic);
-            EnableCityStateBGM = booleanOptionFactory(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM);
-            PlaySystemSounds = booleanOptionFactory(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds);
+            PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted);
+            EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic);
+            EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM);
+            PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds);
 
-            MasterVolume = byteOptionFactory(OptionKind.Master, OptionOffsets.MasterVolume);
-            Bgm = byteOptionFactory(OptionKind.Bgm, OptionOffsets.Bgm);
-            SoundEffects = byteOptionFactory(OptionKind.SoundEffects, OptionOffsets.SoundEffects);
-            Voice = byteOptionFactory(OptionKind.Voice, OptionOffsets.Voice);
-            SystemSounds = byteOptionFactory(OptionKind.SystemSounds, OptionOffsets.SystemSounds);
-            AmbientSounds = byteOptionFactory(OptionKind.AmbientSounds, OptionOffsets.AmbientSounds);
-            Performance = byteOptionFactory(OptionKind.Performance, OptionOffsets.Performance);
+            MasterVolume = makeByteOption(OptionKind.Master, OptionOffsets.MasterVolume);
+            Bgm = makeByteOption(OptionKind.Bgm, OptionOffsets.Bgm);
+            SoundEffects = makeByteOption(OptionKind.SoundEffects, OptionOffsets.SoundEffects);
+            Voice = makeByteOption(OptionKind.Voice, OptionOffsets.Voice);
+            SystemSounds = makeByteOption(OptionKind.SystemSounds, OptionOffsets.SystemSounds);
+            AmbientSounds = makeByteOption(OptionKind.AmbientSounds, OptionOffsets.AmbientSounds);
+            Performance = makeByteOption(OptionKind.Performance, OptionOffsets.Performance);
 
-            Self = byteOptionFactory(OptionKind.Self, OptionOffsets.Self);
-            Party = byteOptionFactory(OptionKind.Party, OptionOffsets.Party);
-            OtherPCs = byteOptionFactory(OptionKind.OtherPCs, OptionOffsets.OtherPCs);
+            Self = makeByteOption(OptionKind.Self, OptionOffsets.Self);
+            Party = makeByteOption(OptionKind.Party, OptionOffsets.Party);
+            OtherPCs = makeByteOption(OptionKind.OtherPCs, OptionOffsets.OtherPCs);
 
-            MasterVolumeMuted = booleanOptionFactory(OptionKind.MasterMuted, OptionOffsets.MasterVolumeMuted);
-            BgmMuted = booleanOptionFactory(OptionKind.BgmMuted, OptionOffsets.BgmMuted);
-            SoundEffectsMuted = booleanOptionFactory(OptionKind.SoundEffectsMuted, OptionOffsets.SoundEffectsMuted);
-            VoiceMuted = booleanOptionFactory(OptionKind.VoiceMuted, OptionOffsets.VoiceMuted);
-            SystemSoundsMuted = booleanOptionFactory(OptionKind.SystemSoundsMuted, OptionOffsets.SystemSoundsMuted);
-            AmbientSoundsMuted = booleanOptionFactory(OptionKind.AmbientSoundsMuted, OptionOffsets.AmbientSoundsMuted);
-            PerformanceMuted = booleanOptionFactory(OptionKind.PerformanceMuted, OptionOffsets.PerformanceMuted);
+            MasterVolumeMuted = makeBooleanOption(OptionKind.MasterMuted, OptionOffsets.MasterVolumeMuted);
+            BgmMuted = makeBooleanOption(OptionKind.BgmMuted, OptionOffsets.BgmMuted);
+            SoundEffectsMuted = makeBooleanOption(OptionKind.SoundEffectsMuted, OptionOffsets.SoundEffectsMuted);
+            VoiceMuted = makeBooleanOption(OptionKind.VoiceMuted, OptionOffsets.VoiceMuted);
+            SystemSoundsMuted = makeBooleanOption(OptionKind.SystemSoundsMuted, OptionOffsets.SystemSoundsMuted);
+            AmbientSoundsMuted = makeBooleanOption(OptionKind.AmbientSoundsMuted, OptionOffsets.AmbientSoundsMuted);
+            PerformanceMuted = makeBooleanOption(OptionKind.PerformanceMuted, OptionOffsets.PerformanceMuted);
 
             EqualizerMode = new EqualizerModeOption
             {

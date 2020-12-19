@@ -1,5 +1,4 @@
 ﻿using System;
-using static SoundSetter.OptionInternals.SetOption;
 
 namespace SoundSetter.OptionInternals
 {
