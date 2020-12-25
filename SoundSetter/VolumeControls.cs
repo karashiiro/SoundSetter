@@ -105,6 +105,17 @@ namespace SoundSetter
             };
         }
 
+        public static void AdjustVolume(ByteOption option, int volumeTarget, OperationKind interaction)
+        {
+            var curVol = option.GetValue();
+            if (interaction == OperationKind.Add)
+                option.SetValue((byte)Math.Min(curVol + volumeTarget, 100));
+            else if (interaction == OperationKind.Subtract)
+                option.SetValue((byte)Math.Max(curVol - volumeTarget, 0));
+            else
+                option.SetValue((byte)Math.Min(volumeTarget, 100));
+        }
+
         public void Dispose()
         {
             this.setOptionHook?.Disable();

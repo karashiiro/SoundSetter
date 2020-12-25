@@ -8,6 +8,20 @@ A [Dalamud](https://github.com/goatcorp/Dalamud) plugin that allows volume contr
 
 `/ssconfig` - Alias for `/soundsetterconfig`
 
+`/ssmv +/-amount`: Adjust the game's master volume by the specified quantity.
+
+`/ssbgm +/-amount`: Adjust the game's BGM volume by the specified quantity.
+
+`/sssfx +/-amount`: Adjust the game's SFX volume by the specified quantity.
+
+`/ssv +/-amount`: Adjust the game's voice volume by the specified quantity.
+
+`/sssys +/-amount`: Adjust the game's system sound volume by the specified quantity.
+
+`/ssas +/-amount`: Adjust the game's ambient sound volume by the specified quantity.
+
+`/ssp +/-amount`: Adjust the game's performance volume by the specified quantity.
+
 `Ctrl+K` - Default keybind for opening the plugin configuration. This can be changed in the plugin configuration.
 
 ## Screenshots
