@@ -1,0 +1,5 @@
+﻿name: SoundSetter
+author: karashiiro
+description: A Dalamud plugin that allows volume control from anywhere, including gpose and cutscenes.
+repo_url: https://github.com/karashiiro/SoundSetter
+tags: ["tool", "sound", "volume", "control"]
