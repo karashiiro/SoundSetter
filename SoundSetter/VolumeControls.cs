@@ -72,9 +72,13 @@ namespace SoundSetter
             var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, setOption);
 
             PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted);
+            PlayMusicWhenMounted.Hack = false;
             EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic);
+            EnableNormalBattleMusic.Hack = false;
             EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM);
+            EnableCityStateBGM.Hack = false;
             PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds);
+            PlaySystemSounds.Hack = false;
 
             MasterVolume = makeByteOption(OptionKind.Master, OptionOffsets.MasterVolume);
             Bgm = makeByteOption(OptionKind.Bgm, OptionOffsets.Bgm);
