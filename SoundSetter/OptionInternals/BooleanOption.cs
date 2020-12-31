@@ -14,12 +14,12 @@ namespace SoundSetter.OptionInternals
 
         public override void SetValue(bool value)
         {
-            var toWrite = value ? 1UL : 0UL;
+            var toWrite = value ? 1U : 0U;
             SetFunction(BaseAddress, Kind, toWrite);
 
             // This is a hack to make the native text commands work as expected; do not reuse this
             // or expect it to work elsewhere.
-            if (Hack) Marshal.WriteInt64(BaseAddress, Offset - 21504, (long)toWrite);
+            if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
         }
 
         public static Func<OptionKind, int, BooleanOption> CreateFactory(IntPtr baseAddress, SetOptionDelegate setFunction)
