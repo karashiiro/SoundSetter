@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game;
 using System;
+using System.Dynamic;
 using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
@@ -10,6 +11,7 @@ namespace SoundSetter
     public class VolumeControls : IDisposable
     {
         private readonly Hook<SetOptionDelegate> setOptionHook;
+        private readonly Action<ExpandoObject> onChange;
 
         public IntPtr BaseAddress { get; private set; }
 
@@ -40,8 +42,10 @@ namespace SoundSetter
 
         public EqualizerModeOption EqualizerMode { get; private set; }
 
-        public VolumeControls(SigScanner scanner)
+        public VolumeControls(SigScanner scanner, Action<ExpandoObject> onChange)
         {
+            this.onChange = onChange;
+
             try
             {
                 // I thought I'd need the user to change the settings manually once to get the the base address,
@@ -68,8 +72,8 @@ namespace SoundSetter
 
         private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var makeByteOption = ByteOption.CreateFactory(BaseAddress, setOption);
-            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, setOption);
+            var makeByteOption = ByteOption.CreateFactory(BaseAddress, this.onChange, setOption);
+            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, this.onChange, setOption);
 
             PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted);
             PlayMusicWhenMounted.Hack = false;
@@ -105,6 +109,7 @@ namespace SoundSetter
                 BaseAddress = BaseAddress,
                 Offset = OptionOffsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
+                OnChange = this.onChange,
                 SetFunction = setOption,
             };
         }

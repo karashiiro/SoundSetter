@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <FileVersion>1.2.2.0</FileVersion>
+    <AssemblyVersion>1.2.3.0</AssemblyVersion>
+    <FileVersion>1.2.3.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -34,6 +34,7 @@
       <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks')">$(AppData)\XIVLauncher\addon\Hooks\ImGuiScene.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json">
       <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks')">$(AppData)\XIVLauncher\addon\Hooks\Newtonsoft.Json.dll</HintPath>
       <Private>false</Private>

@@ -25,7 +25,7 @@ namespace SoundSetter
             this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
-            this.vc = new VolumeControls(this.pluginInterface.TargetModuleScanner);
+            this.vc = new VolumeControls(this.pluginInterface.TargetModuleScanner, this.pluginInterface.SendMessage);
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
