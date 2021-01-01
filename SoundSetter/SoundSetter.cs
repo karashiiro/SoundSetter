@@ -3,6 +3,7 @@ using SoundSetter.Attributes;
 using System;
 using System.Text;
 using Dalamud.Game.Chat;
+using Dalamud.Game.ClientState;
 using Dalamud.Game.Internal.Gui;
 
 namespace SoundSetter
@@ -44,7 +45,11 @@ namespace SoundSetter
             // We don't want to open the UI before the player loads, that leaves the options uninitialized.
             if (this.pluginInterface.ClientState.LocalPlayer == null) return;
 
-            if (this.config.OnlyShowInCutscenes) return; // Don't trigger on keydowns in this case.
+            var cutsceneActive = this.pluginInterface.ClientState != null &&
+                                     this.pluginInterface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+                                     this.pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene78];
+
+            if (this.config.OnlyShowInCutscenes && cutsceneActive) return;
 
             if (this.pluginInterface.ClientState.KeyState[(byte)this.config.ModifierKey] &&
                 this.pluginInterface.ClientState.KeyState[(byte)this.config.MajorKey])
