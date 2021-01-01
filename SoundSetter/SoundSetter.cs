@@ -29,7 +29,7 @@ namespace SoundSetter
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
-            this.ui = new SoundSetterUi(this.vc, this.config);
+            this.ui = new SoundSetterUi(this.vc, this.pluginInterface, this.config);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnBuildUi += OnTick;
 
@@ -43,6 +43,8 @@ namespace SoundSetter
         {
             // We don't want to open the UI before the player loads, that leaves the options uninitialized.
             if (this.pluginInterface.ClientState.LocalPlayer == null) return;
+
+            if (this.config.OnlyShowInCutscenes) return; // Don't trigger on keydowns in this case.
 
             if (this.pluginInterface.ClientState.KeyState[(byte)this.config.ModifierKey] &&
                 this.pluginInterface.ClientState.KeyState[(byte)this.config.MajorKey])

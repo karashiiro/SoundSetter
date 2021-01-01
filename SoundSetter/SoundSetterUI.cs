@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Plugin;
 using ImGuiNET;
 using SoundSetter.OptionInternals;
 
@@ -9,14 +10,18 @@ namespace SoundSetter
 {
     public class SoundSetterUi
     {
+        private static readonly Vector4 HintColor = new Vector4(0.7f, 0.7f, 0.7f, 1.0f);
+
         private readonly Configuration config;
+        private readonly DalamudPluginInterface pi;
         private readonly VolumeControls vc;
 
         public bool IsVisible { get; set; }
 
-        public SoundSetterUi(VolumeControls vc, Configuration config)
+        public SoundSetterUi(VolumeControls vc, DalamudPluginInterface pi, Configuration config)
         {
             this.vc = vc;
+            this.pi = pi;
             this.config = config;
         }
 
@@ -63,6 +68,15 @@ namespace SoundSetter
             }
             ImGui.PopItemWidth();
 
+            var onlyCutscenes = this.config.OnlyShowInCutscenes;
+            if (ImGui.Checkbox("Only enable keybind during cutscenes.##SoundSetterCutsceneOption", ref onlyCutscenes))
+            {
+                this.config.OnlyShowInCutscenes = onlyCutscenes;
+                this.config.Save();
+            }
+            ImGui.TextColored(HintColor, "Use /ssconfig to reopen this window.");
+
+            ImGui.Spacing();
             ImGui.Text("Sound Settings");
 
             var playMusicWhenMounted = this.vc.PlayMusicWhenMounted.GetValue();
