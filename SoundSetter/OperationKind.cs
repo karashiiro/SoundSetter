@@ -2,6 +2,8 @@
 {
     public enum OperationKind
     {
+        Mute,
+        Unmute,
         Set,
         Add,
         Subtract,

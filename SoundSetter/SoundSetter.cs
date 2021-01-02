@@ -1,10 +1,12 @@
 ﻿using Dalamud.Plugin;
 using SoundSetter.Attributes;
 using System;
+using System.Linq;
 using System.Text;
 using Dalamud.Game.Chat;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Internal.Gui;
+// ReSharper disable ConvertIfStatementToSwitchStatement
 
 namespace SoundSetter
 {
@@ -82,6 +84,20 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Mute)
+            {
+                this.vc.MasterVolumeMuted.SetValue(true);
+                chat.Print("Master volume muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.MasterVolumeMuted.SetValue(false);
+                chat.Print("Master volume unmuted.");
+                return;
+            }
+
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
                 PrintChatError(chat, string.Format(ErrorMessages.AdjustCommand, MasterVolumeAdjustCommand));
@@ -100,6 +116,20 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Mute)
+            {
+                this.vc.BgmMuted.SetValue(true);
+                chat.Print("BGM volume muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.BgmMuted.SetValue(false);
+                chat.Print("BGM volume unmuted.");
+                return;
+            }
 
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
@@ -120,6 +150,20 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Mute)
+            {
+                this.vc.SoundEffectsMuted.SetValue(true);
+                chat.Print("SFX volume muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.SoundEffectsMuted.SetValue(false);
+                chat.Print("SFX volume unmuted.");
+                return;
+            }
+
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
                 PrintChatError(chat, string.Format(ErrorMessages.AdjustCommand, SoundEffectsAdjustCommand));
@@ -138,6 +182,20 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Mute)
+            {
+                this.vc.VoiceMuted.SetValue(true);
+                chat.Print("Voice volume muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.VoiceMuted.SetValue(false);
+                chat.Print("Voice volume unmuted.");
+                return;
+            }
 
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
@@ -158,6 +216,20 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Mute)
+            {
+                this.vc.SystemSoundsMuted.SetValue(true);
+                chat.Print("System sounds muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.SystemSoundsMuted.SetValue(false);
+                chat.Print("System sounds unmuted.");
+                return;
+            }
+
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
                 PrintChatError(chat, string.Format(ErrorMessages.AdjustCommand, SystemSoundsAdjustCommand));
@@ -176,6 +248,20 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Mute)
+            {
+                this.vc.AmbientSoundsMuted.SetValue(true);
+                chat.Print("Ambient sounds muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.AmbientSoundsMuted.SetValue(false);
+                chat.Print("Ambient sounds unmuted.");
+                return;
+            }
 
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
@@ -196,6 +282,20 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Mute)
+            {
+                this.vc.PerformanceMuted.SetValue(true);
+                chat.Print("Performance volume muted.");
+                return;
+            }
+
+            if (op == OperationKind.Unmute)
+            {
+                this.vc.PerformanceMuted.SetValue(false);
+                chat.Print("Performance volume unmuted.");
+                return;
+            }
+
             if (!int.TryParse(volumeTargetStr, out var volumeTarget))
             {
                 PrintChatError(chat, string.Format(ErrorMessages.AdjustCommand, PerformanceAdjustCommand));
@@ -208,7 +308,22 @@ namespace SoundSetter
 
         private static void ParseAdjustArgs(string args, out OperationKind op, out string volumeTargetStr)
         {
-            var argsList = args.Split(' ');
+            var argsList = args.Split(' ').Select(a => a.ToLower()).ToList();
+
+            if (argsList[0] == "mute")
+            {
+                op = OperationKind.Mute;
+                volumeTargetStr = "";
+                return;
+            }
+
+            if (argsList[0] == "unmute")
+            {
+                op = OperationKind.Unmute;
+                volumeTargetStr = "";
+                return;
+            }
+
             volumeTargetStr = argsList[0];
             op = volumeTargetStr[0] switch
             {
