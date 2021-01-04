@@ -22,7 +22,7 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, ByteOption> CreateFactory(IntPtr baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind, int, string, ByteOption> CreateFactory(IntPtr baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new ByteOption
             {
