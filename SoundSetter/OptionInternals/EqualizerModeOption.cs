@@ -13,6 +13,10 @@ namespace SoundSetter.OptionInternals
         {
             SetFunction(BaseAddress, Kind, (byte)value);
             NotifyOptionChanged(value);
+            
+            var cfg = LoadConfig();
+            cfg.Settings[CfgSection][CfgSetting] = value.ToString();
+            cfg.Save();
         }
     }
 }

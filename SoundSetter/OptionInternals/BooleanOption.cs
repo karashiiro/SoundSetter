@@ -22,16 +22,26 @@ namespace SoundSetter.OptionInternals
             // This is a hack to make the native text commands work as expected; do not reuse this
             // or expect it to work elsewhere.
             if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
+
+            if (string.IsNullOrEmpty(CfgSetting)) return;
+            var cfg = LoadConfig();
+            cfg.Settings[CfgSection][CfgSetting] = value ? "1" : "0";
+            cfg.Save();
         }
 
-        public static Func<OptionKind, int, BooleanOption> CreateFactory(IntPtr baseAddress, Action<ExpandoObject> onChange, SetOptionDelegate setFunction)
+        public static Func<OptionKind, int, BooleanOption> CreateFactory(IntPtr baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
         {
-            return (optionKind, offset) => new BooleanOption
+            return (optionKind, offset, cfgSetting) => new BooleanOption
             {
                 BaseAddress = baseAddress,
                 Offset = offset,
                 Kind = optionKind,
+                
+                CfgSection = cfgSection,
+                CfgSetting = cfgSetting,
+                
                 OnChange = onChange,
+                
                 SetFunction = setFunction,
             };
         }
