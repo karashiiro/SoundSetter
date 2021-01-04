@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Dynamic;
 
 namespace SoundSetter.OptionInternals
 {
@@ -10,6 +11,7 @@ namespace SoundSetter.OptionInternals
         public int Offset { get; set; }
         public string CfgSection { get; set; }
         public string CfgSetting { get; set; }
+        public Action<ExpandoObject> OnChange { get; set; }
         public SetOptionDelegate SetFunction { get; set; }
 
         public abstract TManagedValue GetValue();
@@ -23,6 +25,14 @@ namespace SoundSetter.OptionInternals
                 "FINAL FANTASY XIV - A Realm Reborn",
                 "FFXIV.cfg");
             return new CFG(path);
+        }
+        
+        protected void NotifyOptionChanged(TManagedValue value)
+        {
+            dynamic message = new ExpandoObject();
+            message.OptionKind = Kind;
+            message.Value = value;
+            OnChange?.Invoke(message);
         }
     }
 }

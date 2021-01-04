@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game;
 using System;
+using System.Dynamic;
 using System.Runtime.InteropServices;
 using Dalamud.Hooking;
 using Dalamud.Plugin;
@@ -10,6 +11,7 @@ namespace SoundSetter
     public class VolumeControls : IDisposable
     {
         private readonly Hook<SetOptionDelegate> setOptionHook;
+        private readonly Action<ExpandoObject> onChange;
 
         public IntPtr BaseAddress { get; private set; }
 
@@ -40,8 +42,10 @@ namespace SoundSetter
 
         public EqualizerModeOption EqualizerMode { get; private set; }
 
-        public VolumeControls(SigScanner scanner)
+        public VolumeControls(SigScanner scanner, Action<ExpandoObject> onChange)
         {
+            this.onChange = onChange;
+
             try
             {
                 // I thought I'd need the user to change the settings manually once to get the the base address,
@@ -68,13 +72,17 @@ namespace SoundSetter
 
         private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var makeByteOption = ByteOption.CreateFactory(BaseAddress, "SoundPlay Settings", setOption);
-            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, "SoundPlay Settings", setOption);
+            var makeByteOption = ByteOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
 
             PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted, null);
+            PlayMusicWhenMounted.Hack = false;
             EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic, null);
+            EnableNormalBattleMusic.Hack = false;
             EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM, null);
+            EnableCityStateBGM.Hack = false;
             PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds, null);
+            PlaySystemSounds.Hack = false;
 
             MasterVolume = makeByteOption(OptionKind.Master, OptionOffsets.MasterVolume, "SoundMaster");
             Bgm = makeByteOption(OptionKind.Bgm, OptionOffsets.Bgm, "SoundBgm");
@@ -101,8 +109,12 @@ namespace SoundSetter
                 BaseAddress = BaseAddress,
                 Offset = OptionOffsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
+                
                 CfgSection = "SoundPlay Settings",
                 CfgSetting = "SoundEqualizerType",
+                
+                OnChange = this.onChange,
+                
                 SetFunction = setOption,
             };
         }
