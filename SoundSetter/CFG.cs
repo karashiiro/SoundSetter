@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -53,7 +54,12 @@ namespace SoundSetter
                     var kvp = line.Split('\t');
                     var key = kvp[0];
                     var value = kvp.Length > 1 ? kvp[1] : "";
-                    cfg[currentSection].Add(key, value);
+
+                    try
+                    {
+                        cfg[currentSection].Add(key, value);
+                    }
+                    catch (ArgumentException) { } // Yes, this is bad practice.
                 }
             }
             return cfg;
