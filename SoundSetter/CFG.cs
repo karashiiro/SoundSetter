@@ -47,19 +47,20 @@ namespace SoundSetter
                 if (line.StartsWith("<"))
                 {
                     currentSection = line.Substring(1, line.Length - 2);
-                    cfg.Add(currentSection, new Dictionary<string, string>());
+                    if (!cfg.ContainsKey(currentSection))
+                    {
+                        cfg.Add(currentSection, new Dictionary<string, string>());
+                    }
                 }
                 else if (line.IndexOf('\t') != -1 && currentSection != null)
                 {
                     var kvp = line.Split('\t');
                     var key = kvp[0];
                     var value = kvp.Length > 1 ? kvp[1] : "";
-
-                    try
+                    if (!cfg[currentSection].ContainsKey(key))
                     {
                         cfg[currentSection].Add(key, value);
                     }
-                    catch (ArgumentException) { } // Yes, this is bad practice.
                 }
             }
             return cfg;
