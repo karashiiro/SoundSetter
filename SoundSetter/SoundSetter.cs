@@ -49,6 +49,7 @@ namespace SoundSetter
 
             var cutsceneActive = this.pluginInterface.ClientState != null &&
                                      this.pluginInterface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+                                     this.pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene] ||
                                      this.pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene78];
 
             if (this.config.OnlyShowInCutscenes && !cutsceneActive) return;
