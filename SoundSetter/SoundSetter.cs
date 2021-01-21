@@ -45,10 +45,9 @@ namespace SoundSetter
         private void OnTick()
         {
             // We don't want to open the UI before the player loads, that leaves the options uninitialized.
-            if (this.pluginInterface.ClientState.LocalPlayer == null) return;
+            if (this.pluginInterface.ClientState.LocalContentId == 0) return;
 
-            var cutsceneActive = this.pluginInterface.ClientState != null &&
-                                     this.pluginInterface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+            var cutsceneActive = this.pluginInterface.ClientState.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
                                      this.pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene] ||
                                      this.pluginInterface.ClientState.Condition[ConditionFlag.WatchingCutscene78];
 
