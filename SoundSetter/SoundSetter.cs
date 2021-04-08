@@ -3,7 +3,7 @@ using SoundSetter.Attributes;
 using System;
 using System.Linq;
 using System.Text;
-using Dalamud.Game.Chat;
+using Dalamud.Game.Text;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Internal.Gui;
 // ReSharper disable ConvertIfStatementToSwitchStatement
