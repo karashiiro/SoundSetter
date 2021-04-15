@@ -2,12 +2,12 @@
 {
     public enum OptionKind : ulong
     {
-        PlayMusicWhenMounted = 18,
+        PlayMusicWhenMounted = 19,
         EnableNormalBattleMusic,
         EnableCityStateBGM,
         PlaySystemSounds,
 
-        Master = 23,
+        Master = 24,
         Bgm,
         SoundEffects,
         Voice,
@@ -27,6 +27,6 @@
         AmbientSoundsMuted,
         PerformanceMuted,
 
-        EqualizerMode = 49,
+        EqualizerMode = 50,
     }
 }
