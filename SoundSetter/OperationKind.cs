@@ -7,5 +7,6 @@
         Set,
         Add,
         Subtract,
+        Toggle,
     }
 }

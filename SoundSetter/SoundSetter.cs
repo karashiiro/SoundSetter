@@ -84,6 +84,12 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.MasterVolumeMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
+
             if (op == OperationKind.Mute)
             {
                 this.vc.MasterVolumeMuted.SetValue(true);
@@ -116,6 +122,12 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.BgmMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
 
             if (op == OperationKind.Mute)
             {
@@ -150,6 +162,12 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.SoundEffectsMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
+
             if (op == OperationKind.Mute)
             {
                 this.vc.SoundEffectsMuted.SetValue(true);
@@ -182,6 +200,12 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.VoiceMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
 
             if (op == OperationKind.Mute)
             {
@@ -216,6 +240,12 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.SystemSoundsMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
+
             if (op == OperationKind.Mute)
             {
                 this.vc.SystemSoundsMuted.SetValue(true);
@@ -248,6 +278,12 @@ namespace SoundSetter
             var chat = this.pluginInterface.Framework.Gui.Chat;
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.AmbientSoundsMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
 
             if (op == OperationKind.Mute)
             {
@@ -282,6 +318,12 @@ namespace SoundSetter
 
             ParseAdjustArgs(args, out var op, out var volumeTargetStr);
 
+            if (op == OperationKind.Toggle)
+            {
+                var muted = this.vc.PerformanceMuted.GetValue();
+                op = muted ? OperationKind.Unmute : OperationKind.Mute;
+            }
+
             if (op == OperationKind.Mute)
             {
                 this.vc.PerformanceMuted.SetValue(true);
@@ -308,19 +350,25 @@ namespace SoundSetter
 
         private static void ParseAdjustArgs(string args, out OperationKind op, out string volumeTargetStr)
         {
+            volumeTargetStr = "";
+
+            if (string.IsNullOrEmpty(args))
+            {
+                op = OperationKind.Toggle;
+                return;
+            }
+
             var argsList = args.Split(' ').Select(a => a.ToLower()).ToList();
 
             if (argsList[0] == "mute")
             {
                 op = OperationKind.Mute;
-                volumeTargetStr = "";
                 return;
             }
 
             if (argsList[0] == "unmute")
             {
                 op = OperationKind.Unmute;
-                volumeTargetStr = "";
                 return;
             }
 

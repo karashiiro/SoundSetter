@@ -8,6 +8,7 @@
             "  Increase the volume by 10: {0} +10\n" +
             "  Decrease the volume by 10: {0} -10\n" +
             "  Mute the volume option: {0} mute\n" +
-            "  Unmute the volume option: {0} unmute";
+            "  Unmute the volume option: {0} unmute\n" +
+            "  Toggle the volume option: {0}";
     }
 }
