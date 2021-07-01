@@ -8,9 +8,9 @@ using SoundSetter.OptionInternals;
 
 namespace SoundSetter
 {
-    public class SoundSetterUi
+    public class SoundSetterUI
     {
-        private static readonly Vector4 HintColor = new Vector4(0.7f, 0.7f, 0.7f, 1.0f);
+        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
         private readonly Configuration config;
         private readonly DalamudPluginInterface pi;
@@ -18,7 +18,7 @@ namespace SoundSetter
 
         public bool IsVisible { get; set; }
 
-        public SoundSetterUi(VolumeControls vc, DalamudPluginInterface pi, Configuration config)
+        public SoundSetterUI(VolumeControls vc, DalamudPluginInterface pi, Configuration config)
         {
             this.vc = vc;
             this.pi = pi;

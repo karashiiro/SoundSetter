@@ -16,14 +16,14 @@ namespace SoundSetter
         private PluginCommandManager<SoundSetter> commandManager;
 
         private Configuration config;
-        private SoundSetterUi ui;
+        private SoundSetterUI ui;
         private VolumeControls vc;
 
         public string Name => "SoundSetter";
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(DalamudPluginInterface pi)
         {
-            this.pluginInterface = pluginInterface;
+            this.pluginInterface = pi;
 
             this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
@@ -32,7 +32,7 @@ namespace SoundSetter
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
-            this.ui = new SoundSetterUi(this.vc, this.pluginInterface, this.config);
+            this.ui = new SoundSetterUI(this.vc, this.pluginInterface, this.config);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnBuildUi += OnTick;
 
