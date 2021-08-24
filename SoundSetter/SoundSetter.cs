@@ -431,8 +431,6 @@ namespace SoundSetter
             PluginInterface.UiBuilder.Draw -= this.ui.Draw;
 
             this.vc.Dispose();
-
-            PluginInterface.Dispose();
         }
 
         public void Dispose()
