@@ -1,10 +1,10 @@
 ﻿using Dalamud.Game;
+using Dalamud.Hooking;
+using Dalamud.Logging;
+using SoundSetter.OptionInternals;
 using System;
 using System.Dynamic;
 using System.Runtime.InteropServices;
-using Dalamud.Hooking;
-using Dalamud.Plugin;
-using SoundSetter.OptionInternals;
 
 namespace SoundSetter
 {
@@ -109,12 +109,12 @@ namespace SoundSetter
                 BaseAddress = BaseAddress,
                 Offset = OptionOffsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
-                
+
                 CfgSection = "SoundPlay Settings",
                 CfgSetting = "SoundEqualizerType",
-                
+
                 OnChange = this.onChange,
-                
+
                 SetFunction = setOption,
             };
         }

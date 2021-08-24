@@ -12,13 +12,13 @@ namespace SoundSetter
 {
     public class PluginCommandManager<THost> : IDisposable
     {
-        private readonly DalamudPluginInterface pluginInterface;
+        private readonly CommandManager commands;
         private readonly (string, CommandInfo)[] pluginCommands;
         private readonly THost host;
 
-        public PluginCommandManager(THost host, DalamudPluginInterface pluginInterface)
+        public PluginCommandManager(THost host, CommandManager commands)
         {
-            this.pluginInterface = pluginInterface;
+            this.commands = commands;
             this.host = host;
 
             this.pluginCommands = host.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
@@ -38,7 +38,7 @@ namespace SoundSetter
             for (var i = 0; i < this.pluginCommands.Length; i++)
             {
                 var (command, commandInfo) = this.pluginCommands[i];
-                this.pluginInterface.CommandManager.AddHandler(command, commandInfo);
+                this.commands.AddHandler(command, commandInfo);
             }
         }
 
@@ -47,7 +47,7 @@ namespace SoundSetter
             for (var i = 0; i < this.pluginCommands.Length; i++)
             {
                 var (command, _) = this.pluginCommands[i];
-                this.pluginInterface.CommandManager.RemoveHandler(command);
+                this.commands.RemoveHandler(command);
             }
         }
 
