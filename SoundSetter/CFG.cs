@@ -20,19 +20,16 @@ namespace SoundSetter
         public void Save()
         {
             var text = new StringBuilder();
-            foreach (var section in Settings)
+            foreach (var (sectionName, settings) in Settings)
             {
-                var sectionName = section.Key;
-                var settings = section.Value;
-
                 text.AppendLine();
-                text.Append("<").Append(sectionName).AppendLine(">");
-                foreach (var setting in settings)
+                text.Append('<').Append(sectionName).AppendLine(">");
+                foreach (var (key, value) in settings)
                 {
-                    text.Append(setting.Key).Append('\t').AppendLine(setting.Value);
+                    text.Append(key).Append('\t').AppendLine(value);
                 }
             }
-            text.Append(" ");
+            text.Append(' ');
             File.WriteAllText(this.path, text.ToString());
         }
 
@@ -45,7 +42,7 @@ namespace SoundSetter
             {
                 if (line.StartsWith("<"))
                 {
-                    currentSection = line.Substring(1, line.Length - 2);
+                    currentSection = line[1..^1];
                     if (!cfg.ContainsKey(currentSection))
                     {
                         cfg.Add(currentSection, new Dictionary<string, string>());
