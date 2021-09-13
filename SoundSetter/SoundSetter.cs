@@ -1,17 +1,18 @@
-﻿using Dalamud.Plugin;
-using SoundSetter.Attributes;
-using System;
-using System.Linq;
-using System.Text;
-using Dalamud.Game;
-using Dalamud.Game.Text;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
+using Dalamud.Plugin;
+using SoundSetter.Attributes;
+using SoundSetter.OptionInternals;
+using System;
+using System.Linq;
+using System.Text;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 
@@ -119,36 +120,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's master volume by the specified quantity.")]
         public void MasterVolumeAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.MasterVolumeMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.MasterVolumeMuted.SetValue(true);
-                ChatGui.Print("Master volume muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.MasterVolumeMuted.SetValue(false);
-                ChatGui.Print("Master volume unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, MasterVolumeAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.MasterVolume, volumeTarget, op);
-            ChatGui.Print($"Master volume set to {this.vc.MasterVolume.GetValue()}.");
+            DoCommand(
+                MasterVolumeAdjustCommand,
+                "Master",
+                ErrorMessages.AdjustCommand,
+                this.vc.MasterVolumeMuted,
+                this.vc.MasterVolume,
+                args);
         }
 
         private const string BgmAdjustCommand = "/ssbgm";
@@ -156,36 +134,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's BGM volume by the specified quantity.")]
         public void BgmAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.BgmMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.BgmMuted.SetValue(true);
-                ChatGui.Print("BGM volume muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.BgmMuted.SetValue(false);
-                ChatGui.Print("BGM volume unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, BgmAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.Bgm, volumeTarget, op);
-            ChatGui.Print($"BGM volume set to {this.vc.Bgm.GetValue()}.");
+            DoCommand(
+                BgmAdjustCommand,
+                "BGM",
+                ErrorMessages.AdjustCommand,
+                this.vc.BgmMuted,
+                this.vc.Bgm,
+                args);
         }
 
         private const string SoundEffectsAdjustCommand = "/sssfx";
@@ -193,36 +148,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's SFX volume by the specified quantity.")]
         public void SoundEffectsAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.SoundEffectsMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.SoundEffectsMuted.SetValue(true);
-                ChatGui.Print("SFX volume muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.SoundEffectsMuted.SetValue(false);
-                ChatGui.Print("SFX volume unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, SoundEffectsAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.SoundEffects, volumeTarget, op);
-            ChatGui.Print($"SFX volume set to {this.vc.SoundEffects.GetValue()}.");
+            DoCommand(
+                SoundEffectsAdjustCommand,
+                "SFX",
+                ErrorMessages.AdjustCommand,
+                this.vc.SoundEffectsMuted,
+                this.vc.SoundEffects,
+                args);
         }
 
         private const string VoiceAdjustCommand = "/ssv";
@@ -230,36 +162,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's voice volume by the specified quantity.")]
         public void VoiceAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.VoiceMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.VoiceMuted.SetValue(true);
-                ChatGui.Print("Voice volume muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.VoiceMuted.SetValue(false);
-                ChatGui.Print("Voice volume unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, VoiceAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.Voice, volumeTarget, op);
-            ChatGui.Print($"Voice volume set to {this.vc.Voice.GetValue()}.");
+            DoCommand(
+                VoiceAdjustCommand,
+                "Voice",
+                ErrorMessages.AdjustCommand,
+                this.vc.VoiceMuted,
+                this.vc.Voice,
+                args);
         }
 
         private const string SystemSoundsAdjustCommand = "/sssys";
@@ -267,36 +176,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's system sound volume by the specified quantity.")]
         public void SystemSoundsAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.SystemSoundsMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.SystemSoundsMuted.SetValue(true);
-                ChatGui.Print("System sounds muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.SystemSoundsMuted.SetValue(false);
-                ChatGui.Print("System sounds unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, SystemSoundsAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.SystemSounds, volumeTarget, op);
-            ChatGui.Print($"System sound volume set to {this.vc.SystemSounds.GetValue()}.");
+            DoCommand(
+                SystemSoundsAdjustCommand,
+                "System sound",
+                ErrorMessages.AdjustCommand,
+                this.vc.SystemSoundsMuted,
+                this.vc.SystemSounds,
+                args);
         }
 
         private const string AmbientSoundsAdjustCommand = "/ssas";
@@ -304,36 +190,13 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's ambient sound volume by the specified quantity.")]
         public void AmbientSoundsAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
-
-            if (op == OperationKind.Toggle)
-            {
-                var muted = this.vc.AmbientSoundsMuted.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
-
-            if (op == OperationKind.Mute)
-            {
-                this.vc.AmbientSoundsMuted.SetValue(true);
-                ChatGui.Print("Ambient sounds muted.");
-                return;
-            }
-
-            if (op == OperationKind.Unmute)
-            {
-                this.vc.AmbientSoundsMuted.SetValue(false);
-                ChatGui.Print("Ambient sounds unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, AmbientSoundsAdjustCommand));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(this.vc.AmbientSounds, volumeTarget, op);
-            ChatGui.Print($"Ambient sound volume set to {this.vc.AmbientSounds.GetValue()}.");
+            DoCommand(
+                AmbientSoundsAdjustCommand,
+                "Ambient sound",
+                ErrorMessages.AdjustCommand,
+                this.vc.AmbientSoundsMuted,
+                this.vc.AmbientSounds,
+                args);
         }
 
         private const string PerformanceAdjustCommand = "/ssp";
@@ -341,36 +204,47 @@ namespace SoundSetter
         [HelpMessage("Adjust the game's performance volume by the specified quantity.")]
         public void PerformanceAdjust(string command, string args)
         {
-            ParseAdjustArgs(args, out var op, out var volumeTargetStr);
+            DoCommand(
+                PerformanceAdjustCommand,
+                "Performance",
+                ErrorMessages.AdjustCommand,
+                this.vc.PerformanceMuted,
+                this.vc.Performance,
+                args);
+        }
+
+        private void DoCommand(string command, string optName, string errorMessage, BooleanOption boolOpt, ByteOption varOpt, string args)
+        {
+            ParseAdjustArgs(args, out var op, out var targetStr);
 
             if (op == OperationKind.Toggle)
             {
-                var muted = this.vc.PerformanceMuted.GetValue();
+                var muted = boolOpt.GetValue();
                 op = muted ? OperationKind.Unmute : OperationKind.Mute;
             }
 
             if (op == OperationKind.Mute)
             {
-                this.vc.PerformanceMuted.SetValue(true);
-                ChatGui.Print("Performance volume muted.");
+                boolOpt.SetValue(true);
+                ChatGui.Print($"{optName} volume muted.");
                 return;
             }
 
             if (op == OperationKind.Unmute)
             {
-                this.vc.PerformanceMuted.SetValue(false);
-                ChatGui.Print("Performance volume unmuted.");
+                boolOpt.SetValue(false);
+                ChatGui.Print($"{optName} volume unmuted.");
                 return;
             }
 
-            if (!int.TryParse(volumeTargetStr, out var volumeTarget))
+            if (!int.TryParse(targetStr, out var volumeTarget))
             {
-                PrintChatError(ChatGui, string.Format(ErrorMessages.AdjustCommand, PerformanceAdjustCommand));
+                PrintChatError(ChatGui, string.Format(errorMessage, command));
                 return;
             }
 
-            VolumeControls.AdjustVolume(this.vc.Performance, volumeTarget, op);
-            ChatGui.Print($"Performance volume set to {this.vc.Performance.GetValue()}.");
+            VolumeControls.AdjustVolume(varOpt, volumeTarget, op);
+            ChatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
         }
 
         private static void ParseAdjustArgs(string args, out OperationKind op, out string volumeTargetStr)
