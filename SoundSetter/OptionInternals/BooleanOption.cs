@@ -16,7 +16,7 @@ namespace SoundSetter.OptionInternals
         public override void SetValue(bool value)
         {
             var toWrite = value ? 1U : 0U;
-            SetFunction(BaseAddress, Kind, toWrite);
+            SetFunction(BaseAddress, Kind, toWrite, 2, 1, 1);
             NotifyOptionChanged(value);
 
             // This is a hack to make the native text commands work as expected; do not reuse this
@@ -24,7 +24,7 @@ namespace SoundSetter.OptionInternals
             if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
-            var cfg = LoadConfig();
+            var cfg = CFG.Load();
             if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = toWrite.ToString();
             cfg.Save();

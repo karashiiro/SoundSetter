@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Dalamud.Logging;
+using JetBrains.Annotations;
 
 namespace SoundSetter
 {
@@ -60,6 +63,26 @@ namespace SoundSetter
                 }
             }
             return cfg;
+        }
+
+        [CanBeNull]
+        public static CFG Load()
+        {
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "my games",
+                "FINAL FANTASY XIV - A Realm Reborn",
+                "FFXIV.cfg");
+
+            try
+            {
+                return new CFG(path);
+            }
+            catch (Exception e)
+            {
+                PluginLog.LogError(e, "Failed to load configuration object.");
+                return null;
+            }
         }
     }
 }

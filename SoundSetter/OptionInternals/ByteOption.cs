@@ -13,11 +13,11 @@ namespace SoundSetter.OptionInternals
 
         public override void SetValue(byte value)
         {
-            SetFunction(BaseAddress, Kind, value);
+            SetFunction(BaseAddress, Kind, value, 2, 1, 1);
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
-            var cfg = LoadConfig();
+            var cfg = CFG.Load();
             if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = value.ToString();
             cfg.Save();

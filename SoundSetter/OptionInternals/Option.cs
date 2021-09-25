@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Dynamic;
-using Dalamud.Logging;
-using JetBrains.Annotations;
 
 namespace SoundSetter.OptionInternals
 {
@@ -19,26 +16,6 @@ namespace SoundSetter.OptionInternals
         public abstract TManagedValue GetValue();
         public abstract void SetValue(TManagedValue value);
 
-        [CanBeNull]
-        protected CFG LoadConfig()
-        {
-            var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "my games",
-                "FINAL FANTASY XIV - A Realm Reborn",
-                "FFXIV.cfg");
-
-            try
-            {
-                return new CFG(path);
-            }
-            catch (Exception e)
-            {
-                PluginLog.LogError(e, "Failed to load configuration object.");
-                return null;
-            }
-        }
-        
         protected void NotifyOptionChanged(TManagedValue value)
         {
             dynamic message = new ExpandoObject();

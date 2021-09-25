@@ -30,10 +30,6 @@ namespace SoundSetter
 
         [PluginService]
         [RequiredVersion("1.0")]
-        private SeStringManager SeStringManager { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
         private CommandManager Commands { get; init; }
 
         [PluginService]
@@ -283,11 +279,11 @@ namespace SoundSetter
                 volumeTargetStr = volumeTargetStr[1..];
         }
 
-        private void PrintChatError(ChatGui chat, string message)
+        private static void PrintChatError(ChatGui chat, string message)
         {
             chat.PrintChat(new XivChatEntry
             {
-                Message = SeStringManager.Parse(Encoding.UTF8.GetBytes(message)),
+                Message = SeString.Parse(Encoding.UTF8.GetBytes(message)),
                 Type = XivChatType.ErrorMessage,
             });
         }
