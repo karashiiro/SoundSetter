@@ -11,7 +11,7 @@ namespace SoundSetter.OptionInternals
 
         public override void SetValue(EqualizerMode.Enum value)
         {
-            SetFunction(BaseAddress, Kind, (byte)value);
+            SetFunction(BaseAddress, Kind, (byte)value, 2, 1, 1);
             NotifyOptionChanged(value);
             
             var cfg = LoadConfig();
