@@ -137,6 +137,7 @@ namespace SoundSetter
         {
             this.setOptionHook?.Disable();
             this.setOptionHook?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

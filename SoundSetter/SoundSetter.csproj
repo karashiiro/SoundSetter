@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>1.5.2.1</Version>
+    <Version>1.5.2.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -25,6 +25,7 @@ namespace SoundSetter.OptionInternals
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
             var cfg = LoadConfig();
+            if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = toWrite.ToString();
             cfg.Save();
         }
