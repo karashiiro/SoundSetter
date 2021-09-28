@@ -54,7 +54,7 @@ namespace SoundSetter
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
                 this.setOptionHook = new Hook<SetOptionDelegate>(setConfigurationPtr, (baseAddress, kind, value, unk1, unk2, unk3) =>
                 {
-                    if (unk1 == 2 && MasterVolume == null)
+                    if (MasterVolume == null)
                     {
                         BaseAddress = baseAddress;
                         InitializeOptions(setOption);
