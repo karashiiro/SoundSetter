@@ -13,6 +13,7 @@ using SoundSetter.OptionInternals;
 using System;
 using System.Linq;
 using System.Text;
+using Dalamud.Logging;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 
@@ -213,34 +214,43 @@ namespace SoundSetter
         {
             ParseAdjustArgs(args, out var op, out var targetStr);
 
-            if (op == OperationKind.Toggle)
+            try
             {
-                var muted = boolOpt.GetValue();
-                op = muted ? OperationKind.Unmute : OperationKind.Mute;
-            }
+                if (op == OperationKind.Toggle)
+                {
+                    var muted = boolOpt?.GetValue();
+                    op = muted == true ? OperationKind.Unmute : OperationKind.Mute;
+                }
 
-            if (op == OperationKind.Mute)
+                if (op == OperationKind.Mute)
+                {
+                    VolumeControls.ToggleVolume(boolOpt, op);
+                    ChatGui.Print($"{optName} volume muted.");
+                    return;
+                }
+
+                if (op == OperationKind.Unmute)
+                {
+                    VolumeControls.ToggleVolume(boolOpt, op);
+                    ChatGui.Print($"{optName} volume unmuted.");
+                    return;
+                }
+
+                if (!int.TryParse(targetStr, out var volumeTarget))
+                {
+                    PrintChatError(ChatGui, string.Format(errorMessage, command));
+                    return;
+                }
+
+                VolumeControls.AdjustVolume(varOpt, volumeTarget, op);
+                ChatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
+            }
+            catch (InvalidOperationException e)
             {
-                boolOpt.SetValue(true);
-                ChatGui.Print($"{optName} volume muted.");
-                return;
+                PluginLog.LogError(e, "Command failed.");
+                ChatGui.Print("SoundSetter is uninitialized.");
+                ChatGui.Print("Please manually change a volume setting once in order to initialize the plugin.");
             }
-
-            if (op == OperationKind.Unmute)
-            {
-                boolOpt.SetValue(false);
-                ChatGui.Print($"{optName} volume unmuted.");
-                return;
-            }
-
-            if (!int.TryParse(targetStr, out var volumeTarget))
-            {
-                PrintChatError(ChatGui, string.Format(errorMessage, command));
-                return;
-            }
-
-            VolumeControls.AdjustVolume(varOpt, volumeTarget, op);
-            ChatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
         }
 
         private static void ParseAdjustArgs(string args, out OperationKind op, out string volumeTargetStr)
@@ -254,20 +264,33 @@ namespace SoundSetter
             }
 
             var argsList = args.Split(' ').Select(a => a.ToLower()).ToList();
+            
+            var arg0 = argsList.FirstOrDefault();
+            if (string.IsNullOrEmpty(arg0))
+            {
+                op = OperationKind.Set;
+                return;
+            }
 
-            if (argsList[0] == "mute")
+            if (arg0 == "toggle")
+            {
+                op = OperationKind.Toggle;
+                return;
+            }
+            
+            if (arg0 == "mute")
             {
                 op = OperationKind.Mute;
                 return;
             }
 
-            if (argsList[0] == "unmute")
+            if (arg0 == "unmute")
             {
                 op = OperationKind.Unmute;
                 return;
             }
 
-            volumeTargetStr = argsList[0];
+            volumeTargetStr = arg0;
             op = volumeTargetStr[0] switch
             {
                 '+' => OperationKind.Add,

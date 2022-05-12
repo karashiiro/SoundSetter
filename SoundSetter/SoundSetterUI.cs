@@ -234,7 +234,7 @@ namespace SoundSetter
 
         private static void Fail()
         {
-            ImGui.Text("This appears to be your first installation of this plugin.\nPlease manually change a volume setting once in order to initialize the plugin.");
+            ImGui.Text("This appears to be your first installation of this plugin (or you reloaded all of your plugins).\nPlease manually change a volume setting once in order to initialize the plugin.");
         }
 
         private static string VolumeButtonName(bool state, string internalName)

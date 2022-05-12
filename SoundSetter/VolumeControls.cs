@@ -60,9 +60,7 @@ namespace SoundSetter
                         InitializeOptions(setOption);
                     }
 
-#if DEBUG
-                    PluginLog.Log($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
-#endif
+                    PluginLog.LogDebug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
                     return this.setOptionHook.Original(baseAddress, kind, value, unk1, unk2, unk3);
                 });
                 this.setOptionHook.Enable();
@@ -122,15 +120,52 @@ namespace SoundSetter
             };
         }
 
+        public static void ToggleVolume(BooleanOption option, OperationKind interaction)
+        {
+            if (option == null)
+            {
+                throw new InvalidOperationException("Plugin is uninitialized; sound settings must be modified once for options to be changed.");
+            }
+            
+            var muted = option.GetValue();
+            switch (interaction)
+            {
+                case OperationKind.Unmute:
+                    option.SetValue(false);
+                    break;
+                case OperationKind.Mute:
+                    option.SetValue(true);
+                    break;
+                case OperationKind.Toggle:
+                    option.SetValue(!muted);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(interaction));
+            }
+        }
+
         public static void AdjustVolume(ByteOption option, int volumeTarget, OperationKind interaction)
         {
+            if (option == null)
+            {
+                throw new InvalidOperationException("Plugin is uninitialized; sound settings must be modified once for options to be changed.");
+            }
+            
             var curVol = option.GetValue();
-            if (interaction == OperationKind.Add)
-                option.SetValue((byte)Math.Min(curVol + volumeTarget, 100));
-            else if (interaction == OperationKind.Subtract)
-                option.SetValue((byte)Math.Max(curVol - volumeTarget, 0));
-            else
-                option.SetValue((byte)Math.Min(volumeTarget, 100));
+            switch (interaction)
+            {
+                case OperationKind.Add:
+                    option.SetValue((byte)Math.Min(curVol + volumeTarget, 100));
+                    break;
+                case OperationKind.Subtract:
+                    option.SetValue((byte)Math.Max(curVol - volumeTarget, 0));
+                    break;
+                case OperationKind.Set:
+                    option.SetValue((byte)Math.Min(volumeTarget, 100));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(interaction));
+            }
         }
 
         public void Dispose()
