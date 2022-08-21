@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.6" />
+    <PackageReference Include="DalamudPackager" Version="2.1.7" />
     <PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
   </ItemGroup>
 
