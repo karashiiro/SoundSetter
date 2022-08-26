@@ -50,6 +50,8 @@ namespace SoundSetter
             {
                 // I thought I'd need the user to change the settings manually once to get the the base address,
                 // but the function is automatically called once when the player is initialized, so I'll settle for that.
+                // Note to self: Cheat Engine's "Select current function" tool is unreliable, don't waste time with it.
+                // This signature is probably stable, but the option struct offsets need to be updated after some patches.
                 var setConfigurationPtr = scanner.ScanText("89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
                 this.setOptionHook = Hook<SetOptionDelegate>.FromAddress(setConfigurationPtr, (baseAddress, kind, value, unk1, unk2, unk3) =>
