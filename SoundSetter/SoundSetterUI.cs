@@ -48,7 +48,7 @@ namespace SoundSetter
 
         private void Settings()
         {
-            var buttonSize = new Vector2(23, 23);
+            var buttonSize = new Vector2(23, 23) * ImGui.GetIO().FontGlobalScale;
 
             ImGui.Text("Plugin Settings");
 
@@ -239,7 +239,7 @@ namespace SoundSetter
 
         private static string VolumeButtonName(bool state, string internalName)
         {
-            return $"{(state ? FontAwesomeIcon.VolumeOff.ToIconString() : FontAwesomeIcon.VolumeUp.ToIconString())}#SoundSetter{internalName}";
+            return $"{(state ? FontAwesomeIcon.VolumeOff.ToIconString() : FontAwesomeIcon.VolumeUp.ToIconString())}##SoundSetter{internalName}";
         }
     }
 }
