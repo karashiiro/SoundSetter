@@ -21,33 +21,11 @@ namespace SoundSetter
 {
     public class SoundSetter : IDalamudPlugin
     {
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private DalamudPluginInterface PluginInterface { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private SigScanner SigScanner { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private CommandManager Commands { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private Condition Condition { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private KeyState KeyState { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private ClientState ClientState { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private ChatGui ChatGui { get; init; }
+        private readonly DalamudPluginInterface pluginInterface;
+        private readonly ChatGui chatGui;
+        private readonly Condition condition;
+        private readonly KeyState keyState;
+        private readonly ClientState clientState;
 
         private readonly PluginCommandManager<SoundSetter> commandManager;
 
@@ -57,38 +35,52 @@ namespace SoundSetter
 
         public string Name => "SoundSetter";
 
-        public SoundSetter()
+        public SoundSetter(
+            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+            [RequiredVersion("1.0")] ChatGui chatGui,
+            [RequiredVersion("1.0")] SigScanner sigScanner,
+            [RequiredVersion("1.0")] CommandManager commands,
+            [RequiredVersion("1.0")] Condition condition,
+            [RequiredVersion("1.0")] ClientState clientState,
+            [RequiredVersion("1.0")] KeyState keyState)
         {
-            this.config = (Configuration)PluginInterface.GetPluginConfig() ?? new Configuration();
-            this.config.Initialize(PluginInterface);
+            this.pluginInterface = pluginInterface;
+            this.chatGui = chatGui;
+            this.condition = condition;
+            this.clientState = clientState;
+            this.keyState = keyState;
 
-            this.vc = new VolumeControls(SigScanner, null); // TODO: restore IPC
+            this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
+            this.config.Initialize(this.pluginInterface);
 
-            PluginInterface.UiBuilder.DisableAutomaticUiHide = true;
+            this.vc = new VolumeControls(sigScanner, null); // TODO: restore IPC
 
-            this.ui = new SoundSetterUI(this.vc, PluginInterface, this.config);
-            PluginInterface.UiBuilder.Draw += this.ui.Draw;
-            PluginInterface.UiBuilder.Draw += OnTick;
+            this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
-            PluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
+            this.ui = new SoundSetterUI(this.vc, this.pluginInterface, this.config);
+            this.pluginInterface.UiBuilder.Draw += this.ui.Draw;
+            this.pluginInterface.UiBuilder.Draw += OnTick;
 
-            this.commandManager = new PluginCommandManager<SoundSetter>(this, Commands);
+            this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
+
+            this.commandManager = new PluginCommandManager<SoundSetter>(this, commands);
         }
 
         private bool keysDown;
+
         private void OnTick()
         {
             // We don't want to open the UI before the player loads, that leaves the options uninitialized.
-            if (ClientState.LocalContentId == 0) return;
+            if (this.clientState.LocalContentId == 0) return;
 
-            var cutsceneActive = Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
-                                     Condition[ConditionFlag.WatchingCutscene] ||
-                                     Condition[ConditionFlag.WatchingCutscene78];
+            var cutsceneActive = this.condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+                                 this.condition[ConditionFlag.WatchingCutscene] ||
+                                 this.condition[ConditionFlag.WatchingCutscene78];
 
             if (this.config.OnlyShowInCutscenes && !cutsceneActive) return;
 
-            if (KeyState[(byte)this.config.ModifierKey] &&
-                KeyState[(byte)this.config.MajorKey])
+            if (this.keyState[(byte)this.config.ModifierKey] &&
+                this.keyState[(byte)this.config.MajorKey])
             {
                 if (this.keysDown) return;
 
@@ -113,6 +105,7 @@ namespace SoundSetter
             => this.ui.IsVisible = true;
 
         private const string MasterVolumeAdjustCommand = "/ssmv";
+
         [Command(MasterVolumeAdjustCommand)]
         [HelpMessage("Adjust the game's master volume by the specified quantity.")]
         public void MasterVolumeAdjust(string command, string args)
@@ -127,6 +120,7 @@ namespace SoundSetter
         }
 
         private const string BgmAdjustCommand = "/ssbgm";
+
         [Command(BgmAdjustCommand)]
         [HelpMessage("Adjust the game's BGM volume by the specified quantity.")]
         public void BgmAdjust(string command, string args)
@@ -141,6 +135,7 @@ namespace SoundSetter
         }
 
         private const string SoundEffectsAdjustCommand = "/sssfx";
+
         [Command(SoundEffectsAdjustCommand)]
         [HelpMessage("Adjust the game's SFX volume by the specified quantity.")]
         public void SoundEffectsAdjust(string command, string args)
@@ -155,6 +150,7 @@ namespace SoundSetter
         }
 
         private const string VoiceAdjustCommand = "/ssv";
+
         [Command(VoiceAdjustCommand)]
         [HelpMessage("Adjust the game's voice volume by the specified quantity.")]
         public void VoiceAdjust(string command, string args)
@@ -169,6 +165,7 @@ namespace SoundSetter
         }
 
         private const string SystemSoundsAdjustCommand = "/sssys";
+
         [Command(SystemSoundsAdjustCommand)]
         [HelpMessage("Adjust the game's system sound volume by the specified quantity.")]
         public void SystemSoundsAdjust(string command, string args)
@@ -183,6 +180,7 @@ namespace SoundSetter
         }
 
         private const string AmbientSoundsAdjustCommand = "/ssas";
+
         [Command(AmbientSoundsAdjustCommand)]
         [HelpMessage("Adjust the game's ambient sound volume by the specified quantity.")]
         public void AmbientSoundsAdjust(string command, string args)
@@ -197,6 +195,7 @@ namespace SoundSetter
         }
 
         private const string PerformanceAdjustCommand = "/ssp";
+
         [Command(PerformanceAdjustCommand)]
         [HelpMessage("Adjust the game's performance volume by the specified quantity.")]
         public void PerformanceAdjust(string command, string args)
@@ -210,7 +209,8 @@ namespace SoundSetter
                 args);
         }
 
-        private void DoCommand(string command, string optName, string errorMessage, BooleanOption boolOpt, ByteOption varOpt, string args)
+        private void DoCommand(string command, string optName, string errorMessage, BooleanOption boolOpt,
+            ByteOption varOpt, string args)
         {
             ParseAdjustArgs(args, out var op, out var targetStr);
 
@@ -225,31 +225,31 @@ namespace SoundSetter
                 if (op == OperationKind.Mute)
                 {
                     VolumeControls.ToggleVolume(boolOpt, op);
-                    ChatGui.Print($"{optName} volume muted.");
+                    this.chatGui.Print($"{optName} volume muted.");
                     return;
                 }
 
                 if (op == OperationKind.Unmute)
                 {
                     VolumeControls.ToggleVolume(boolOpt, op);
-                    ChatGui.Print($"{optName} volume unmuted.");
+                    this.chatGui.Print($"{optName} volume unmuted.");
                     return;
                 }
 
                 if (!int.TryParse(targetStr, out var volumeTarget))
                 {
-                    PrintChatError(ChatGui, string.Format(errorMessage, command));
+                    PrintChatError(this.chatGui, string.Format(errorMessage, command));
                     return;
                 }
 
                 VolumeControls.AdjustVolume(varOpt, volumeTarget, op);
-                ChatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
+                this.chatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
             }
             catch (InvalidOperationException e)
             {
                 PluginLog.LogError(e, "Command failed.");
-                ChatGui.Print("SoundSetter is uninitialized.");
-                ChatGui.Print("Please manually change a volume setting once in order to initialize the plugin.");
+                this.chatGui.Print("SoundSetter is uninitialized.");
+                this.chatGui.Print("Please manually change a volume setting once in order to initialize the plugin.");
             }
         }
 
@@ -264,7 +264,7 @@ namespace SoundSetter
             }
 
             var argsList = args.Split(' ').Select(a => a.ToLower()).ToList();
-            
+
             var arg0 = argsList.FirstOrDefault();
             if (string.IsNullOrEmpty(arg0))
             {
@@ -277,7 +277,7 @@ namespace SoundSetter
                 op = OperationKind.Toggle;
                 return;
             }
-            
+
             if (arg0 == "mute")
             {
                 op = OperationKind.Mute;
@@ -312,16 +312,17 @@ namespace SoundSetter
         }
 
         #region IDisposable Support
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
 
             this.commandManager.Dispose();
 
-            PluginInterface.UiBuilder.OpenConfigUi -= OpenConfig;
+            this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfig;
 
-            PluginInterface.UiBuilder.Draw -= OnTick;
-            PluginInterface.UiBuilder.Draw -= this.ui.Draw;
+            this.pluginInterface.UiBuilder.Draw -= OnTick;
+            this.pluginInterface.UiBuilder.Draw -= this.ui.Draw;
 
             this.vc.Dispose();
         }
@@ -331,6 +332,7 @@ namespace SoundSetter
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }
