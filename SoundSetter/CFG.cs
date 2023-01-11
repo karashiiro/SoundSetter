@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Dalamud.Logging;
-using JetBrains.Annotations;
 
 namespace SoundSetter
 {
@@ -65,7 +64,6 @@ namespace SoundSetter
             return cfg;
         }
 
-        [CanBeNull]
         public static CFG Load()
         {
             var path = Path.Combine(
