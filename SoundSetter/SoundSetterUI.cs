@@ -34,7 +34,7 @@ namespace SoundSetter
             ImGui.Begin("SoundSetter Configuration", ref pVisible, ImGuiWindowFlags.AlwaysAutoResize);
             IsVisible = pVisible;
 
-            if (this.vc.BaseAddress == IntPtr.Zero)
+            if (this.vc.BaseAddress == nint.Zero)
             {
                 Fail();
             }

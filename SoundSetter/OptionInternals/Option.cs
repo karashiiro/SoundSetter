@@ -6,7 +6,7 @@ namespace SoundSetter.OptionInternals
     public abstract class Option<TManagedValue> where TManagedValue : struct
     {
         public OptionKind Kind { get; set; }
-        public IntPtr BaseAddress { get; set; }
+        public nint BaseAddress { get; set; }
         public int Offset { get; set; }
         public string CfgSection { get; set; }
         public string CfgSetting { get; set; }

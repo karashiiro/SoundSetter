@@ -13,7 +13,7 @@ namespace SoundSetter
         private readonly Hook<SetOptionDelegate> setOptionHook;
         private readonly Action<ExpandoObject> onChange;
 
-        public IntPtr BaseAddress { get; private set; }
+        public nint BaseAddress { get; private set; }
 
         public BooleanOption PlayMusicWhenMounted { get; private set; }
         public BooleanOption EnableNormalBattleMusic { get; private set; }
