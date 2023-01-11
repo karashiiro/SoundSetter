@@ -1,32 +1,55 @@
-﻿namespace SoundSetter.OptionInternals
+﻿using System.IO;
+using System.Reflection;
+using Dalamud.Logging;
+using Newtonsoft.Json;
+
+namespace SoundSetter.OptionInternals
 {
-    public static class OptionOffsets
+    public class OptionOffsets
     {
-        public const int PlayMusicWhenMounted = 44880;
-        public const int EnableNormalBattleMusic = 44896;
-        public const int EnableCityStateBGM = 44912;
-        public const int PlaySystemSounds = 44928;
+        public int PlayMusicWhenMounted { get; set; }
+        public int EnableNormalBattleMusic { get; set; }
+        public int EnableCityStateBGM { get; set; }
+        public int PlaySystemSounds { get; set; }
 
-        public const int MasterVolume = 44960;
-        public const int Bgm = 44976;
-        public const int SoundEffects = 44992;
-        public const int Voice = 45008;
-        public const int SystemSounds = 45024;
-        public const int AmbientSounds = 45040;
-        public const int Performance = 45056;
+        public int MasterVolume { get; set; }
+        public int Bgm { get; set; }
+        public int SoundEffects { get; set; }
+        public int Voice { get; set; }
+        public int SystemSounds { get; set; }
+        public int AmbientSounds { get; set; }
+        public int Performance { get; set; }
 
-        public const int Self = 45072;
-        public const int Party = 45088;
-        public const int OtherPCs = 45104;
+        public int Self { get; set; }
+        public int Party { get; set; }
+        public int OtherPCs { get; set; }
 
-        public const int MasterVolumeMuted = 45120;
-        public const int BgmMuted = 45136;
-        public const int SoundEffectsMuted = 45152;
-        public const int VoiceMuted = 45168;
-        public const int SystemSoundsMuted = 45184;
-        public const int AmbientSoundsMuted = 45200;
-        public const int PerformanceMuted = 45216;
+        public int MasterVolumeMuted { get; set; }
+        public int BgmMuted { get; set; }
+        public int SoundEffectsMuted { get; set; }
+        public int VoiceMuted { get; set; }
+        public int SystemSoundsMuted { get; set; }
+        public int AmbientSoundsMuted { get; set; }
+        public int PerformanceMuted { get; set; }
+        public int EqualizerMode { get; set; }
+        
+        private OptionOffsets()
+        {
+        }
 
-        public const int EqualizerMode = 45376;
+        public static OptionOffsets Load()
+        {
+            using var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("SoundSetter.Offsets.json");
+            if (s == null)
+            {
+                PluginLog.LogError("Failed to read option offsets!");
+                return new OptionOffsets();
+            }
+
+            using var sr = new StreamReader(s);
+            var data = sr.ReadToEnd();
+
+            return JsonConvert.DeserializeObject<OptionOffsets>(data);
+        }
     }
 }

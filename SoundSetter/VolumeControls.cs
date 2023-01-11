@@ -12,6 +12,7 @@ namespace SoundSetter
     {
         private readonly Hook<SetOptionDelegate> setOptionHook;
         private readonly Action<ExpandoObject> onChange;
+        private readonly OptionOffsets offsets;
 
         public nint BaseAddress { get; private set; }
 
@@ -45,6 +46,7 @@ namespace SoundSetter
         public VolumeControls(SigScanner scanner, Action<ExpandoObject> onChange)
         {
             this.onChange = onChange;
+            this.offsets = OptionOffsets.Load();
 
             try
             {
@@ -78,39 +80,39 @@ namespace SoundSetter
             var makeByteOption = ByteOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
             var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
 
-            PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, OptionOffsets.PlayMusicWhenMounted, null);
+            PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
             PlayMusicWhenMounted.Hack = false;
-            EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, OptionOffsets.EnableNormalBattleMusic, null);
+            EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, this.offsets.EnableNormalBattleMusic, null);
             EnableNormalBattleMusic.Hack = false;
-            EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, OptionOffsets.EnableCityStateBGM, null);
+            EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
             EnableCityStateBGM.Hack = false;
-            PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, OptionOffsets.PlaySystemSounds, null);
+            PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
             PlaySystemSounds.Hack = false;
 
-            MasterVolume = makeByteOption(OptionKind.Master, OptionOffsets.MasterVolume, "SoundMaster");
-            Bgm = makeByteOption(OptionKind.Bgm, OptionOffsets.Bgm, "SoundBgm");
-            SoundEffects = makeByteOption(OptionKind.SoundEffects, OptionOffsets.SoundEffects, "SoundSe");
-            Voice = makeByteOption(OptionKind.Voice, OptionOffsets.Voice, "SoundVoice");
-            SystemSounds = makeByteOption(OptionKind.SystemSounds, OptionOffsets.SystemSounds, "SoundSystem");
-            AmbientSounds = makeByteOption(OptionKind.AmbientSounds, OptionOffsets.AmbientSounds, "SoundEnv");
-            Performance = makeByteOption(OptionKind.Performance, OptionOffsets.Performance, "SoundPerform");
+            MasterVolume = makeByteOption(OptionKind.Master, this.offsets.MasterVolume, "SoundMaster");
+            Bgm = makeByteOption(OptionKind.Bgm, this.offsets.Bgm, "SoundBgm");
+            SoundEffects = makeByteOption(OptionKind.SoundEffects, this.offsets.SoundEffects, "SoundSe");
+            Voice = makeByteOption(OptionKind.Voice, this.offsets.Voice, "SoundVoice");
+            SystemSounds = makeByteOption(OptionKind.SystemSounds, this.offsets.SystemSounds, "SoundSystem");
+            AmbientSounds = makeByteOption(OptionKind.AmbientSounds, this.offsets.AmbientSounds, "SoundEnv");
+            Performance = makeByteOption(OptionKind.Performance, this.offsets.Performance, "SoundPerform");
 
-            Self = makeByteOption(OptionKind.Self, OptionOffsets.Self, "SoundPlayer");
-            Party = makeByteOption(OptionKind.Party, OptionOffsets.Party, "SoundParty");
-            OtherPCs = makeByteOption(OptionKind.OtherPCs, OptionOffsets.OtherPCs, "SoundOther");
+            Self = makeByteOption(OptionKind.Self, this.offsets.Self, "SoundPlayer");
+            Party = makeByteOption(OptionKind.Party, this.offsets.Party, "SoundParty");
+            OtherPCs = makeByteOption(OptionKind.OtherPCs, this.offsets.OtherPCs, "SoundOther");
 
-            MasterVolumeMuted = makeBooleanOption(OptionKind.MasterMuted, OptionOffsets.MasterVolumeMuted, "IsSndMaster");
-            BgmMuted = makeBooleanOption(OptionKind.BgmMuted, OptionOffsets.BgmMuted, "IsSndBgm");
-            SoundEffectsMuted = makeBooleanOption(OptionKind.SoundEffectsMuted, OptionOffsets.SoundEffectsMuted, "IsSndSe");
-            VoiceMuted = makeBooleanOption(OptionKind.VoiceMuted, OptionOffsets.VoiceMuted, "IsSndVoice");
-            SystemSoundsMuted = makeBooleanOption(OptionKind.SystemSoundsMuted, OptionOffsets.SystemSoundsMuted, "IsSndSystem");
-            AmbientSoundsMuted = makeBooleanOption(OptionKind.AmbientSoundsMuted, OptionOffsets.AmbientSoundsMuted, "IsSndEnv");
-            PerformanceMuted = makeBooleanOption(OptionKind.PerformanceMuted, OptionOffsets.PerformanceMuted, "IsSndPerform");
+            MasterVolumeMuted = makeBooleanOption(OptionKind.MasterMuted, this.offsets.MasterVolumeMuted, "IsSndMaster");
+            BgmMuted = makeBooleanOption(OptionKind.BgmMuted, this.offsets.BgmMuted, "IsSndBgm");
+            SoundEffectsMuted = makeBooleanOption(OptionKind.SoundEffectsMuted, this.offsets.SoundEffectsMuted, "IsSndSe");
+            VoiceMuted = makeBooleanOption(OptionKind.VoiceMuted, this.offsets.VoiceMuted, "IsSndVoice");
+            SystemSoundsMuted = makeBooleanOption(OptionKind.SystemSoundsMuted, this.offsets.SystemSoundsMuted, "IsSndSystem");
+            AmbientSoundsMuted = makeBooleanOption(OptionKind.AmbientSoundsMuted, this.offsets.AmbientSoundsMuted, "IsSndEnv");
+            PerformanceMuted = makeBooleanOption(OptionKind.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
 
             EqualizerMode = new EqualizerModeOption
             {
                 BaseAddress = BaseAddress,
-                Offset = OptionOffsets.EqualizerMode,
+                Offset = this.offsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
 
                 CfgSection = "SoundPlay Settings",

@@ -55,4 +55,9 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="Offsets.json" />
+	  <EmbeddedResource Include="Offsets.json" />
+	</ItemGroup>
+
 </Project>
