@@ -1,0 +1,23 @@
+{
+  "name": "update-offsets",
+  "version": "1.0.0",
+  "description": "A simple script to update the option offsets for SoundSetter.",
+  "main": "update-offsets.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karashiiro/SoundSetter.git#master"
+  },
+  "author": "karashiiro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/karashiiro/SoundSetter/issues"
+  },
+  "homepage": "https://github.com/karashiiro/SoundSetter/tree/master#readme",
+  "dependencies": {
+    "commander": "^9.5.0"
+  }
+}
