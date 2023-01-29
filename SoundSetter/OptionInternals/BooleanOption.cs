@@ -6,7 +6,7 @@ namespace SoundSetter.OptionInternals
 {
     public class BooleanOption : Option<bool>
     {
-        public bool Hack { get; set; } = true;
+        public bool Hack { get; set; }
 
         public override bool GetValue()
         {

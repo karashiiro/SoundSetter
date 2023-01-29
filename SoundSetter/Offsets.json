@@ -1,4 +1,11 @@
 {
+  "PlaySoundsWhileWindowIsNotActive": 45376,
+  "PlaySoundsWhileWindowIsNotActiveBGM": 45792,
+  "PlaySoundsWhileWindowIsNotActiveSoundEffects": 45808,
+  "PlaySoundsWhileWindowIsNotActiveVoice": 45824,
+  "PlaySoundsWhileWindowIsNotActiveSystemSounds": 45840,
+  "PlaySoundsWhileWindowIsNotActiveAmbientSounds": 45856,
+  "PlaySoundsWhileWindowIsNotActivePerformance": 45872,
   "PlayMusicWhenMounted": 45392,
   "EnableNormalBattleMusic": 45408,
   "EnableCityStateBGM": 45424,

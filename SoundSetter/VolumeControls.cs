@@ -16,6 +16,14 @@ namespace SoundSetter
 
         public nint BaseAddress { get; private set; }
 
+        public BooleanOption PlaySoundsWhileWindowIsNotActive { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActiveBGM { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActiveSoundEffects { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActiveVoice { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActiveSystemSounds { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActiveAmbientSounds { get; private set; }
+        public BooleanOption PlaySoundsWhileWindowIsNotActivePerformance { get; private set; }
+
         public BooleanOption PlayMusicWhenMounted { get; private set; }
         public BooleanOption EnableNormalBattleMusic { get; private set; }
         public BooleanOption EnableCityStateBGM { get; private set; }
@@ -54,19 +62,22 @@ namespace SoundSetter
                 // but the function is automatically called once when the player is initialized, so I'll settle for that.
                 // Note to self: Cheat Engine's "Select current function" tool is unreliable, don't waste time with it.
                 // This signature is probably stable, but the option struct offsets need to be updated after some patches.
-                var setConfigurationPtr = scanner.ScanText("89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
+                var setConfigurationPtr =
+                    scanner.ScanText(
+                        "89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
-                this.setOptionHook = Hook<SetOptionDelegate>.FromAddress(setConfigurationPtr, (baseAddress, kind, value, unk1, unk2, unk3) =>
-                {
-                    if (MasterVolume == null)
+                this.setOptionHook = Hook<SetOptionDelegate>.FromAddress(setConfigurationPtr,
+                    (baseAddress, kind, value, unk1, unk2, unk3) =>
                     {
-                        BaseAddress = baseAddress;
-                        InitializeOptions(setOption);
-                    }
+                        if (MasterVolume == null)
+                        {
+                            BaseAddress = baseAddress;
+                            InitializeOptions(setOption);
+                        }
 
-                    PluginLog.LogDebug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
-                    return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
-                });
+                        PluginLog.LogDebug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
+                        return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
+                    });
                 this.setOptionHook.Enable();
             }
             catch (Exception e)
@@ -78,16 +89,26 @@ namespace SoundSetter
         private void InitializeOptions(SetOptionDelegate setOption)
         {
             var makeByteOption = ByteOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
-            var makeBooleanOption = BooleanOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+            var makeBooleanOptionSoundPlay =
+                BooleanOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+            var makeBooleanOptionSoundSettings =
+                BooleanOption.CreateFactory(BaseAddress, this.onChange, "Sound Settings", setOption);
 
-            PlayMusicWhenMounted = makeBooleanOption(OptionKind.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
-            PlayMusicWhenMounted.Hack = false;
-            EnableNormalBattleMusic = makeBooleanOption(OptionKind.EnableNormalBattleMusic, this.offsets.EnableNormalBattleMusic, null);
-            EnableNormalBattleMusic.Hack = false;
-            EnableCityStateBGM = makeBooleanOption(OptionKind.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
-            EnableCityStateBGM.Hack = false;
-            PlaySystemSounds = makeBooleanOption(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
-            PlaySystemSounds.Hack = false;
+            PlaySoundsWhileWindowIsNotActive = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActive, this.offsets.PlaySoundsWhileWindowIsNotActive, "IsSoundAlways");
+            PlaySoundsWhileWindowIsNotActiveBGM = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveBGM, this.offsets.PlaySoundsWhileWindowIsNotActiveBGM, "IsSoundBgmAlways");
+            PlaySoundsWhileWindowIsNotActiveSoundEffects = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveSoundEffects, this.offsets.PlaySoundsWhileWindowIsNotActiveSoundEffects, "IsSoundSeAlways");
+            PlaySoundsWhileWindowIsNotActiveVoice = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveVoice, this.offsets.PlaySoundsWhileWindowIsNotActiveVoice, "IsSoundVoiceAlways");
+            PlaySoundsWhileWindowIsNotActiveSystemSounds = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveSystemSounds, this.offsets.PlaySoundsWhileWindowIsNotActiveSystemSounds, "IsSoundSystemAlways");
+            PlaySoundsWhileWindowIsNotActiveAmbientSounds = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveAmbientSounds, this.offsets.PlaySoundsWhileWindowIsNotActiveAmbientSounds, "IsSoundEnvAlways");
+            PlaySoundsWhileWindowIsNotActivePerformance = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActivePerformance, this.offsets.PlaySoundsWhileWindowIsNotActivePerformance, "IsSoundPerformAlways");
+
+            PlayMusicWhenMounted =
+                makeBooleanOptionSoundPlay(OptionKind.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
+            EnableNormalBattleMusic = makeBooleanOptionSoundPlay(OptionKind.EnableNormalBattleMusic,
+                this.offsets.EnableNormalBattleMusic, null);
+            EnableCityStateBGM =
+                makeBooleanOptionSoundPlay(OptionKind.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
+            PlaySystemSounds = makeBooleanOptionSoundPlay(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
 
             MasterVolume = makeByteOption(OptionKind.Master, this.offsets.MasterVolume, "SoundMaster");
             Bgm = makeByteOption(OptionKind.Bgm, this.offsets.Bgm, "SoundBgm");
@@ -101,13 +122,25 @@ namespace SoundSetter
             Party = makeByteOption(OptionKind.Party, this.offsets.Party, "SoundParty");
             OtherPCs = makeByteOption(OptionKind.OtherPCs, this.offsets.OtherPCs, "SoundOther");
 
-            MasterVolumeMuted = makeBooleanOption(OptionKind.MasterMuted, this.offsets.MasterVolumeMuted, "IsSndMaster");
-            BgmMuted = makeBooleanOption(OptionKind.BgmMuted, this.offsets.BgmMuted, "IsSndBgm");
-            SoundEffectsMuted = makeBooleanOption(OptionKind.SoundEffectsMuted, this.offsets.SoundEffectsMuted, "IsSndSe");
-            VoiceMuted = makeBooleanOption(OptionKind.VoiceMuted, this.offsets.VoiceMuted, "IsSndVoice");
-            SystemSoundsMuted = makeBooleanOption(OptionKind.SystemSoundsMuted, this.offsets.SystemSoundsMuted, "IsSndSystem");
-            AmbientSoundsMuted = makeBooleanOption(OptionKind.AmbientSoundsMuted, this.offsets.AmbientSoundsMuted, "IsSndEnv");
-            PerformanceMuted = makeBooleanOption(OptionKind.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
+            MasterVolumeMuted =
+                makeBooleanOptionSoundPlay(OptionKind.MasterMuted, this.offsets.MasterVolumeMuted, "IsSndMaster");
+            MasterVolumeMuted.Hack = true;
+            BgmMuted = makeBooleanOptionSoundPlay(OptionKind.BgmMuted, this.offsets.BgmMuted, "IsSndBgm");
+            BgmMuted.Hack = true;
+            SoundEffectsMuted =
+                makeBooleanOptionSoundPlay(OptionKind.SoundEffectsMuted, this.offsets.SoundEffectsMuted, "IsSndSe");
+            SoundEffectsMuted.Hack = true;
+            VoiceMuted = makeBooleanOptionSoundPlay(OptionKind.VoiceMuted, this.offsets.VoiceMuted, "IsSndVoice");
+            VoiceMuted.Hack = true;
+            SystemSoundsMuted = makeBooleanOptionSoundPlay(OptionKind.SystemSoundsMuted, this.offsets.SystemSoundsMuted,
+                "IsSndSystem");
+            SystemSoundsMuted.Hack = true;
+            AmbientSoundsMuted =
+                makeBooleanOptionSoundPlay(OptionKind.AmbientSoundsMuted, this.offsets.AmbientSoundsMuted, "IsSndEnv");
+            AmbientSoundsMuted.Hack = true;
+            PerformanceMuted =
+                makeBooleanOptionSoundPlay(OptionKind.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
+            PerformanceMuted.Hack = true;
 
             EqualizerMode = new EqualizerModeOption
             {
@@ -128,9 +161,10 @@ namespace SoundSetter
         {
             if (option == null)
             {
-                throw new InvalidOperationException("Plugin is uninitialized; sound settings must be modified once for options to be changed.");
+                throw new InvalidOperationException(
+                    "Plugin is uninitialized; sound settings must be modified once for options to be changed.");
             }
-            
+
             var muted = option.GetValue();
             switch (interaction)
             {
@@ -152,9 +186,10 @@ namespace SoundSetter
         {
             if (option == null)
             {
-                throw new InvalidOperationException("Plugin is uninitialized; sound settings must be modified once for options to be changed.");
+                throw new InvalidOperationException(
+                    "Plugin is uninitialized; sound settings must be modified once for options to be changed.");
             }
-            
+
             var curVol = option.GetValue();
             switch (interaction)
             {

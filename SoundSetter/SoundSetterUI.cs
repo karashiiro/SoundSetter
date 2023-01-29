@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
-using Dalamud.Plugin;
 using ImGuiNET;
 using SoundSetter.OptionInternals;
 
@@ -13,15 +11,13 @@ namespace SoundSetter
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
         private readonly Configuration config;
-        private readonly DalamudPluginInterface pi;
         private readonly VolumeControls vc;
 
         public bool IsVisible { get; set; }
 
-        public SoundSetterUI(VolumeControls vc, DalamudPluginInterface pi, Configuration config)
+        public SoundSetterUI(VolumeControls vc, Configuration config)
         {
             this.vc = vc;
-            this.pi = pi;
             this.config = config;
         }
 
@@ -59,13 +55,16 @@ namespace SoundSetter
                 this.config.ModifierKey = VirtualKey.IndexToEnum(kItem1);
                 this.config.Save();
             }
+
             ImGui.SameLine();
             var kItem2 = VirtualKey.EnumToIndex(this.config.MajorKey) - 3;
-            if (ImGui.Combo("Keybind##SoundSetterKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
+            if (ImGui.Combo("Keybind##SoundSetterKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(),
+                    VirtualKey.Names.Length - 3))
             {
                 this.config.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
                 this.config.Save();
             }
+
             ImGui.PopItemWidth();
 
             var onlyCutscenes = this.config.OnlyShowInCutscenes;
@@ -74,10 +73,79 @@ namespace SoundSetter
                 this.config.OnlyShowInCutscenes = onlyCutscenes;
                 this.config.Save();
             }
+
             ImGui.TextColored(HintColor, "Use /ssconfig to reopen this window.");
 
             ImGui.Spacing();
             ImGui.Text("Sound Settings");
+
+            var playSoundsWhileWindowIsNotActive = this.vc.PlaySoundsWhileWindowIsNotActive.GetValue();
+            if (ImGui.Checkbox("Play sounds while window is not active.", ref playSoundsWhileWindowIsNotActive))
+            {
+                this.vc.PlaySoundsWhileWindowIsNotActive.SetValue(playSoundsWhileWindowIsNotActive);
+            }
+
+            ImGui.Indent();
+            ImGui.BeginDisabled(!playSoundsWhileWindowIsNotActive);
+            {
+                if (ImGui.BeginTable("SoundSetterWhileInactiveOptions", 2, ImGuiTableFlags.None))
+                {
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActiveBgm = this.vc.PlaySoundsWhileWindowIsNotActiveBGM.GetValue();
+                    if (ImGui.Checkbox("BGM", ref playSoundsWhileWindowIsNotActiveBgm))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActiveBGM.SetValue(playSoundsWhileWindowIsNotActiveBgm);
+                    }
+
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActiveSoundEffects =
+                        this.vc.PlaySoundsWhileWindowIsNotActiveSoundEffects.GetValue();
+                    if (ImGui.Checkbox("Sound Effects", ref playSoundsWhileWindowIsNotActiveSoundEffects))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActiveSoundEffects.SetValue(
+                            playSoundsWhileWindowIsNotActiveSoundEffects);
+                    }
+
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActiveVoice =
+                        this.vc.PlaySoundsWhileWindowIsNotActiveVoice.GetValue();
+                    if (ImGui.Checkbox("Voice", ref playSoundsWhileWindowIsNotActiveVoice))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActiveVoice.SetValue(playSoundsWhileWindowIsNotActiveVoice);
+                    }
+
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActiveSystemSounds =
+                        this.vc.PlaySoundsWhileWindowIsNotActiveSystemSounds.GetValue();
+                    if (ImGui.Checkbox("System Sounds", ref playSoundsWhileWindowIsNotActiveSystemSounds))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActiveSystemSounds.SetValue(
+                            playSoundsWhileWindowIsNotActiveSystemSounds);
+                    }
+
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActiveAmbientSounds =
+                        this.vc.PlaySoundsWhileWindowIsNotActiveAmbientSounds.GetValue();
+                    if (ImGui.Checkbox("Ambient Sounds", ref playSoundsWhileWindowIsNotActiveAmbientSounds))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActiveAmbientSounds.SetValue(
+                            playSoundsWhileWindowIsNotActiveAmbientSounds);
+                    }
+
+                    ImGui.TableNextColumn();
+                    var playSoundsWhileWindowIsNotActivePerformance =
+                        this.vc.PlaySoundsWhileWindowIsNotActivePerformance.GetValue();
+                    if (ImGui.Checkbox("Performance", ref playSoundsWhileWindowIsNotActivePerformance))
+                    {
+                        this.vc.PlaySoundsWhileWindowIsNotActivePerformance.SetValue(
+                            playSoundsWhileWindowIsNotActivePerformance);
+                    }
+
+                    ImGui.EndTable();
+                }
+            }
+            ImGui.EndDisabled();
+            ImGui.Unindent();
 
             var playMusicWhenMounted = this.vc.PlayMusicWhenMounted.GetValue();
             if (ImGui.Checkbox("Play music when mounted.", ref playMusicWhenMounted))
@@ -111,6 +179,7 @@ namespace SoundSetter
             {
                 this.vc.MasterVolumeMuted.SetValue(!masterVolumeMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var masterVolume = (int)this.vc.MasterVolume.GetValue();
@@ -125,6 +194,7 @@ namespace SoundSetter
             {
                 this.vc.BgmMuted.SetValue(!bgmMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var bgm = (int)this.vc.Bgm.GetValue();
@@ -139,6 +209,7 @@ namespace SoundSetter
             {
                 this.vc.SoundEffectsMuted.SetValue(!soundEffectsMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var soundEffects = (int)this.vc.SoundEffects.GetValue();
@@ -153,6 +224,7 @@ namespace SoundSetter
             {
                 this.vc.VoiceMuted.SetValue(!voiceMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var voice = (int)this.vc.Voice.GetValue();
@@ -167,6 +239,7 @@ namespace SoundSetter
             {
                 this.vc.SystemSoundsMuted.SetValue(!systemSoundsMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var systemSounds = (int)this.vc.SystemSounds.GetValue();
@@ -181,6 +254,7 @@ namespace SoundSetter
             {
                 this.vc.AmbientSoundsMuted.SetValue(!ambientSoundsMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var ambientSounds = (int)this.vc.AmbientSounds.GetValue();
@@ -195,6 +269,7 @@ namespace SoundSetter
             {
                 this.vc.PerformanceMuted.SetValue(!performanceMuted);
             }
+
             ImGui.PopFont();
             ImGui.SameLine();
             var performance = (int)this.vc.Performance.GetValue();
@@ -234,12 +309,14 @@ namespace SoundSetter
 
         private static void Fail()
         {
-            ImGui.Text("This appears to be your first installation of this plugin (or you reloaded all of your plugins).\nPlease manually change a volume setting once in order to initialize the plugin.");
+            ImGui.Text(
+                "This appears to be your first installation of this plugin (or you reloaded all of your plugins).\nPlease manually change a volume setting once in order to initialize the plugin.");
         }
 
         private static string VolumeButtonName(bool state, string internalName)
         {
-            return $"{(state ? FontAwesomeIcon.VolumeOff.ToIconString() : FontAwesomeIcon.VolumeUp.ToIconString())}##SoundSetter{internalName}";
+            return
+                $"{(state ? FontAwesomeIcon.VolumeOff.ToIconString() : FontAwesomeIcon.VolumeUp.ToIconString())}##SoundSetter{internalName}";
         }
     }
 }

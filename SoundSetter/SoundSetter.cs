@@ -57,7 +57,7 @@ namespace SoundSetter
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
-            this.ui = new SoundSetterUI(this.vc, this.pluginInterface, this.config);
+            this.ui = new SoundSetterUI(this.vc, this.config);
             this.pluginInterface.UiBuilder.Draw += this.ui.Draw;
             this.pluginInterface.UiBuilder.Draw += OnTick;
 

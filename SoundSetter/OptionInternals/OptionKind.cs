@@ -2,7 +2,9 @@
 {
     public enum OptionKind : ulong
     {
-        PlayMusicWhenMounted = 19,
+        PlaySoundsWhileWindowIsNotActive = 18,
+
+        PlayMusicWhenMounted,
         EnableNormalBattleMusic,
         EnableCityStateBGM,
         PlaySystemSounds,
@@ -26,6 +28,13 @@
         SystemSoundsMuted,
         AmbientSoundsMuted,
         PerformanceMuted,
+
+        PlaySoundsWhileWindowIsNotActiveBGM = 44,
+        PlaySoundsWhileWindowIsNotActiveSoundEffects,
+        PlaySoundsWhileWindowIsNotActiveVoice,
+        PlaySoundsWhileWindowIsNotActiveSystemSounds,
+        PlaySoundsWhileWindowIsNotActiveAmbientSounds,
+        PlaySoundsWhileWindowIsNotActivePerformance,
 
         EqualizerMode = 50,
     }

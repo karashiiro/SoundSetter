@@ -7,6 +7,14 @@ namespace SoundSetter.OptionInternals
 {
     public class OptionOffsets
     {
+        public int PlaySoundsWhileWindowIsNotActive { get; set; }
+        public int PlaySoundsWhileWindowIsNotActiveBGM { get; set; }
+        public int PlaySoundsWhileWindowIsNotActiveSoundEffects { get; set; }
+        public int PlaySoundsWhileWindowIsNotActiveVoice { get; set; }
+        public int PlaySoundsWhileWindowIsNotActiveSystemSounds { get; set; }
+        public int PlaySoundsWhileWindowIsNotActiveAmbientSounds { get; set; }
+        public int PlaySoundsWhileWindowIsNotActivePerformance { get; set; }
+
         public int PlayMusicWhenMounted { get; set; }
         public int EnableNormalBattleMusic { get; set; }
         public int EnableCityStateBGM { get; set; }
@@ -32,7 +40,7 @@ namespace SoundSetter.OptionInternals
         public int AmbientSoundsMuted { get; set; }
         public int PerformanceMuted { get; set; }
         public int EqualizerMode { get; set; }
-        
+
         private OptionOffsets()
         {
         }
