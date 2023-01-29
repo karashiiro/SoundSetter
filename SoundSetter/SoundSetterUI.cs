@@ -21,22 +21,57 @@ namespace SoundSetter
             this.config = config;
         }
 
+        /**
+         * isInitialized seems to be true after reloading the plugin
+         * for a single frame. The first time twice is incremented is
+         * the plugin load frame, and the second time twice is incremented
+         * is after initialization.
+         */
+        private int twice = 0;
+
+        /**
+         * Returns the appropriate window flags to allow the user to resize
+         * the window, but only after the plugin has been initialized, and
+         * only after giving ImGui one frame to set the default window size.
+         *
+         * Technically, I could just set appropriate window sizes explicitly,
+         * but then those would need to be maintained, and they would need to
+         * account for global font scaling.
+         */
+        private ImGuiWindowFlags GetWindowFlags()
+        {
+            var isInitialized = this.vc.BaseAddress != nint.Zero;
+            if (!isInitialized)
+            {
+                return ImGuiWindowFlags.AlwaysAutoResize;
+            }
+
+            if (this.twice != 2)
+            {
+                this.twice++;
+                return ImGuiWindowFlags.AlwaysAutoResize;
+            }
+
+            return ImGuiWindowFlags.None;
+        }
+
         public void Draw()
         {
             if (!IsVisible)
                 return;
 
             var pVisible = IsVisible;
-            ImGui.Begin("SoundSetter Configuration", ref pVisible, ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.Begin("SoundSetter Configuration", ref pVisible, GetWindowFlags());
             IsVisible = pVisible;
 
-            if (this.vc.BaseAddress == nint.Zero)
+            var isInitialized = this.vc.BaseAddress != nint.Zero;
+            if (isInitialized)
             {
-                Fail();
+                Settings();
             }
             else
             {
-                Settings();
+                Fail();
             }
 
             ImGui.End();
