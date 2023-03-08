@@ -75,7 +75,9 @@ namespace SoundSetter
                             InitializeOptions(setOption);
                         }
 
+#if DEBUG
                         PluginLog.LogDebug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
+#endif
                         return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
                     });
                 this.setOptionHook.Enable();
