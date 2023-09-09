@@ -1,4 +1,4 @@
-[![Download count](https://img.shields.io/endpoint?url=https://vz32sgcoal.execute-api.us-east-1.amazonaws.com/SoundSetter)](https://github.com/karashiiro/SoundSetter)
+[![Download count](https://img.shields.io/endpoint?url=https://qzysathwfhebdai6xgauhz4q7m0mzmrf.lambda-url.us-east-1.on.aws/SoundSetter)](https://github.com/karashiiro/SoundSetter)
 
 # SoundSetter
 A [Dalamud](https://github.com/goatcorp/Dalamud) plugin that allows volume control from anywhere, including gpose and cutscenes.
