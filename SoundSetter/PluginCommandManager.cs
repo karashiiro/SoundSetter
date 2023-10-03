@@ -1,5 +1,5 @@
 ﻿using Dalamud.Game.Command;
-using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using SoundSetter.Attributes;
 using System;
 using System.Collections.Generic;
@@ -12,11 +12,11 @@ namespace SoundSetter
 {
     public class PluginCommandManager<THost> : IDisposable
     {
-        private readonly CommandManager commands;
+        private readonly ICommandManager commands;
         private readonly (string, CommandInfo)[] pluginCommands;
         private readonly THost host;
 
-        public PluginCommandManager(THost host, CommandManager commands)
+        public PluginCommandManager(THost host, ICommandManager commands)
         {
             this.commands = commands;
             this.host = host;

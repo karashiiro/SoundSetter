@@ -1,8 +1,5 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -14,6 +11,7 @@ using System;
 using System.Linq;
 using System.Text;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 
@@ -22,10 +20,10 @@ namespace SoundSetter
     public class SoundSetter : IDalamudPlugin
     {
         private readonly DalamudPluginInterface pluginInterface;
-        private readonly ChatGui chatGui;
-        private readonly Condition condition;
-        private readonly KeyState keyState;
-        private readonly ClientState clientState;
+        private readonly IChatGui chatGui;
+        private readonly ICondition condition;
+        private readonly IKeyState keyState;
+        private readonly IClientState clientState;
 
         private readonly PluginCommandManager<SoundSetter> commandManager;
 
@@ -37,12 +35,13 @@ namespace SoundSetter
 
         public SoundSetter(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] ChatGui chatGui,
-            [RequiredVersion("1.0")] SigScanner sigScanner,
-            [RequiredVersion("1.0")] CommandManager commands,
-            [RequiredVersion("1.0")] Condition condition,
-            [RequiredVersion("1.0")] ClientState clientState,
-            [RequiredVersion("1.0")] KeyState keyState)
+            [RequiredVersion("1.0")] IChatGui chatGui,
+            [RequiredVersion("1.0")] ISigScanner sigScanner,
+            [RequiredVersion("1.0")] IGameInteropProvider gameinterop,
+            [RequiredVersion("1.0")] ICommandManager commands,
+            [RequiredVersion("1.0")] ICondition condition,
+            [RequiredVersion("1.0")] IClientState clientState,
+            [RequiredVersion("1.0")] IKeyState keyState)
         {
             this.pluginInterface = pluginInterface;
             this.chatGui = chatGui;
@@ -53,7 +52,7 @@ namespace SoundSetter
             this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
-            this.vc = new VolumeControls(sigScanner, null); // TODO: restore IPC
+            this.vc = new VolumeControls(sigScanner, gameinterop, null); // TODO: restore IPC
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
@@ -302,9 +301,9 @@ namespace SoundSetter
                 volumeTargetStr = volumeTargetStr[1..];
         }
 
-        private static void PrintChatError(ChatGui chat, string message)
+        private static void PrintChatError(IChatGui chat, string message)
         {
-            chat.PrintChat(new XivChatEntry
+            chat.Print(new XivChatEntry
             {
                 Message = SeString.Parse(Encoding.UTF8.GetBytes(message)),
                 Type = XivChatType.ErrorMessage,

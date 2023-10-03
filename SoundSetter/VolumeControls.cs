@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using SoundSetter.OptionInternals;
 using System;
 using System.Dynamic;
@@ -51,7 +52,7 @@ namespace SoundSetter
 
         public EqualizerModeOption EqualizerMode { get; private set; }
 
-        public VolumeControls(SigScanner scanner, Action<ExpandoObject> onChange)
+        public VolumeControls(ISigScanner scanner, IGameInteropProvider gameInterop, Action<ExpandoObject> onChange)
         {
             this.onChange = onChange;
             this.offsets = OptionOffsets.Load();
@@ -66,7 +67,7 @@ namespace SoundSetter
                     scanner.ScanText(
                         "89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
                 var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
-                this.setOptionHook = Hook<SetOptionDelegate>.FromAddress(setConfigurationPtr,
+                this.setOptionHook = gameInterop.HookFromAddress<SetOptionDelegate>(setConfigurationPtr,
                     (baseAddress, kind, value, unk1, unk2, unk3) =>
                     {
                         if (MasterVolume == null)
