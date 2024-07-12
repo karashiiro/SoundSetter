@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
@@ -15,10 +16,14 @@ namespace SoundSetter.OptionInternals
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
-            var cfg = CFG.Load();
+            var cfg = CFG.Load(Log);
             if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = value.ToString();
             cfg.Save();
+        }
+
+        public EqualizerModeOption(IPluginLog log) : base(log)
+        {
         }
     }
 }

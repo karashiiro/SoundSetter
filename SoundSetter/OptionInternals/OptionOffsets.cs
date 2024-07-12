@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using Newtonsoft.Json;
 
 namespace SoundSetter.OptionInternals
@@ -45,12 +46,12 @@ namespace SoundSetter.OptionInternals
         {
         }
 
-        public static OptionOffsets Load()
+        public static OptionOffsets Load(IPluginLog log)
         {
             using var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("SoundSetter.Offsets.json");
             if (s == null)
             {
-                PluginLog.LogError("Failed to read option offsets!");
+                log.Error("Failed to read option offsets!");
                 return new OptionOffsets();
             }
 

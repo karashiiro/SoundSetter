@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Dynamic;
 using System.Runtime.InteropServices;
+using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
@@ -17,15 +18,15 @@ namespace SoundSetter.OptionInternals
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
-            var cfg = CFG.Load();
+            var cfg = CFG.Load(Log);
             if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = value.ToString();
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string, ByteOption> CreateFactory(nint baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind, int, string, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
         {
-            return (optionKind, offset, cfgSetting) => new ByteOption
+            return (optionKind, offset, cfgSetting) => new ByteOption(log)
             {
                 BaseAddress = baseAddress,
                 Offset = offset,
@@ -37,6 +38,10 @@ namespace SoundSetter.OptionInternals
                 OnChange = onChange,
                 SetFunction = setFunction,
             };
+        }
+
+        public ByteOption(IPluginLog log) : base(log)
+        {
         }
     }
 }

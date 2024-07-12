@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
@@ -13,8 +14,15 @@ namespace SoundSetter.OptionInternals
         public Action<ExpandoObject> OnChange { get; set; }
         public SetOptionDelegate SetFunction { get; set; }
 
+        protected IPluginLog Log { get; }
+
         public abstract TManagedValue GetValue();
         public abstract void SetValue(TManagedValue value);
+
+        protected Option(IPluginLog log)
+        {
+            Log = log;
+        }
 
         protected void NotifyOptionChanged(TManagedValue value)
         {

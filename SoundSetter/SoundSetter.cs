@@ -19,11 +19,12 @@ namespace SoundSetter
 {
     public class SoundSetter : IDalamudPlugin
     {
-        private readonly DalamudPluginInterface pluginInterface;
+        private readonly IDalamudPluginInterface pluginInterface;
         private readonly IChatGui chatGui;
         private readonly ICondition condition;
         private readonly IKeyState keyState;
         private readonly IClientState clientState;
+        private readonly IPluginLog log;
 
         private readonly PluginCommandManager<SoundSetter> commandManager;
 
@@ -34,25 +35,27 @@ namespace SoundSetter
         public string Name => "SoundSetter";
 
         public SoundSetter(
-            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] IChatGui chatGui,
-            [RequiredVersion("1.0")] ISigScanner sigScanner,
-            [RequiredVersion("1.0")] IGameInteropProvider gameinterop,
-            [RequiredVersion("1.0")] ICommandManager commands,
-            [RequiredVersion("1.0")] ICondition condition,
-            [RequiredVersion("1.0")] IClientState clientState,
-            [RequiredVersion("1.0")] IKeyState keyState)
+            IDalamudPluginInterface pluginInterface,
+            IChatGui chatGui,
+            ISigScanner sigScanner,
+            IGameInteropProvider gameinterop,
+            ICommandManager commands,
+            ICondition condition,
+            IClientState clientState,
+            IKeyState keyState,
+            IPluginLog log)
         {
             this.pluginInterface = pluginInterface;
             this.chatGui = chatGui;
             this.condition = condition;
             this.clientState = clientState;
             this.keyState = keyState;
+            this.log = log;
 
             this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
-            this.vc = new VolumeControls(sigScanner, gameinterop, null); // TODO: restore IPC
+            this.vc = new VolumeControls(sigScanner, gameinterop, log, null); // TODO: restore IPC
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
@@ -246,7 +249,7 @@ namespace SoundSetter
             }
             catch (InvalidOperationException e)
             {
-                PluginLog.LogError(e, "Command failed.");
+                log.Error(e, "Command failed.");
                 this.chatGui.Print("SoundSetter is uninitialized.");
                 this.chatGui.Print("Please manually change a volume setting once in order to initialize the plugin.");
             }

@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game;
 using Dalamud.Hooking;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using SoundSetter.OptionInternals;
 using System;
@@ -14,6 +13,7 @@ namespace SoundSetter
         private readonly Hook<SetOptionDelegate> setOptionHook;
         private readonly Action<ExpandoObject> onChange;
         private readonly OptionOffsets offsets;
+        private readonly IPluginLog log;
 
         public nint BaseAddress { get; private set; }
 
@@ -52,14 +52,19 @@ namespace SoundSetter
 
         public EqualizerModeOption EqualizerMode { get; private set; }
 
-        public VolumeControls(ISigScanner scanner, IGameInteropProvider gameInterop, Action<ExpandoObject> onChange)
+        public VolumeControls(
+            ISigScanner scanner,
+            IGameInteropProvider gameInterop,
+            IPluginLog log,
+            Action<ExpandoObject> onChange)
         {
+            this.log = log;
             this.onChange = onChange;
-            this.offsets = OptionOffsets.Load();
+            this.offsets = OptionOffsets.Load(log);
 
             try
             {
-                // I thought I'd need the user to change the settings manually once to get the the base address,
+                // I thought I'd need the user to change the settings manually once to get the base address,
                 // but the function is automatically called once when the player is initialized, so I'll settle for that.
                 // Note to self: Cheat Engine's "Select current function" tool is unreliable, don't waste time with it.
                 // This signature is probably stable, but the option struct offsets need to be updated after some patches.
@@ -77,7 +82,7 @@ namespace SoundSetter
                         }
 
 #if DEBUG
-                        PluginLog.LogDebug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
+                        log.Debug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
 #endif
                         return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
                     });
@@ -85,25 +90,39 @@ namespace SoundSetter
             }
             catch (Exception e)
             {
-                PluginLog.LogError($"Failed to hook configuration set method! Full error:\n{e}");
+                log.Error($"Failed to hook configuration set method! Full error:\n{e}");
             }
         }
 
         private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var makeByteOption = ByteOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+            var makeByteOption = ByteOption.CreateFactory(this.log, BaseAddress, this.onChange, "SoundPlay Settings", setOption);
             var makeBooleanOptionSoundPlay =
-                BooleanOption.CreateFactory(BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+                BooleanOption.CreateFactory(this.log, BaseAddress, this.onChange, "SoundPlay Settings", setOption);
             var makeBooleanOptionSoundSettings =
-                BooleanOption.CreateFactory(BaseAddress, this.onChange, "Sound Settings", setOption);
+                BooleanOption.CreateFactory(this.log, BaseAddress, this.onChange, "Sound Settings", setOption);
 
-            PlaySoundsWhileWindowIsNotActive = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActive, this.offsets.PlaySoundsWhileWindowIsNotActive, "IsSoundAlways");
-            PlaySoundsWhileWindowIsNotActiveBGM = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveBGM, this.offsets.PlaySoundsWhileWindowIsNotActiveBGM, "IsSoundBgmAlways");
-            PlaySoundsWhileWindowIsNotActiveSoundEffects = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveSoundEffects, this.offsets.PlaySoundsWhileWindowIsNotActiveSoundEffects, "IsSoundSeAlways");
-            PlaySoundsWhileWindowIsNotActiveVoice = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveVoice, this.offsets.PlaySoundsWhileWindowIsNotActiveVoice, "IsSoundVoiceAlways");
-            PlaySoundsWhileWindowIsNotActiveSystemSounds = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveSystemSounds, this.offsets.PlaySoundsWhileWindowIsNotActiveSystemSounds, "IsSoundSystemAlways");
-            PlaySoundsWhileWindowIsNotActiveAmbientSounds = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActiveAmbientSounds, this.offsets.PlaySoundsWhileWindowIsNotActiveAmbientSounds, "IsSoundEnvAlways");
-            PlaySoundsWhileWindowIsNotActivePerformance = makeBooleanOptionSoundSettings(OptionKind.PlaySoundsWhileWindowIsNotActivePerformance, this.offsets.PlaySoundsWhileWindowIsNotActivePerformance, "IsSoundPerformAlways");
+            PlaySoundsWhileWindowIsNotActive = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActive, this.offsets.PlaySoundsWhileWindowIsNotActive,
+                "IsSoundAlways");
+            PlaySoundsWhileWindowIsNotActiveBGM = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActiveBGM, this.offsets.PlaySoundsWhileWindowIsNotActiveBGM,
+                "IsSoundBgmAlways");
+            PlaySoundsWhileWindowIsNotActiveSoundEffects = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActiveSoundEffects,
+                this.offsets.PlaySoundsWhileWindowIsNotActiveSoundEffects, "IsSoundSeAlways");
+            PlaySoundsWhileWindowIsNotActiveVoice = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActiveVoice, this.offsets.PlaySoundsWhileWindowIsNotActiveVoice,
+                "IsSoundVoiceAlways");
+            PlaySoundsWhileWindowIsNotActiveSystemSounds = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActiveSystemSounds,
+                this.offsets.PlaySoundsWhileWindowIsNotActiveSystemSounds, "IsSoundSystemAlways");
+            PlaySoundsWhileWindowIsNotActiveAmbientSounds = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActiveAmbientSounds,
+                this.offsets.PlaySoundsWhileWindowIsNotActiveAmbientSounds, "IsSoundEnvAlways");
+            PlaySoundsWhileWindowIsNotActivePerformance = makeBooleanOptionSoundSettings(
+                OptionKind.PlaySoundsWhileWindowIsNotActivePerformance,
+                this.offsets.PlaySoundsWhileWindowIsNotActivePerformance, "IsSoundPerformAlways");
 
             PlayMusicWhenMounted =
                 makeBooleanOptionSoundPlay(OptionKind.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
@@ -111,7 +130,8 @@ namespace SoundSetter
                 this.offsets.EnableNormalBattleMusic, null);
             EnableCityStateBGM =
                 makeBooleanOptionSoundPlay(OptionKind.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
-            PlaySystemSounds = makeBooleanOptionSoundPlay(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
+            PlaySystemSounds =
+                makeBooleanOptionSoundPlay(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
 
             MasterVolume = makeByteOption(OptionKind.Master, this.offsets.MasterVolume, "SoundMaster");
             Bgm = makeByteOption(OptionKind.Bgm, this.offsets.Bgm, "SoundBgm");
@@ -145,7 +165,7 @@ namespace SoundSetter
                 makeBooleanOptionSoundPlay(OptionKind.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
             PerformanceMuted.Hack = true;
 
-            EqualizerMode = new EqualizerModeOption
+            EqualizerMode = new EqualizerModeOption(this.log)
             {
                 BaseAddress = BaseAddress,
                 Offset = this.offsets.EqualizerMode,

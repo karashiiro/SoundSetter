@@ -23,9 +23,9 @@ namespace SoundSetter
             MajorKey = VirtualKey.Enum.VkK;
         }
 
-        [JsonIgnore] private DalamudPluginInterface pluginInterface;
+        [JsonIgnore] private IDalamudPluginInterface pluginInterface;
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(IDalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
 

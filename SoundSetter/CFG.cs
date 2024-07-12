@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace SoundSetter
 {
@@ -64,7 +65,7 @@ namespace SoundSetter
             return cfg;
         }
 
-        public static CFG Load()
+        public static CFG Load(IPluginLog log)
         {
             var path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -78,7 +79,7 @@ namespace SoundSetter
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to load configuration object.");
+                log.Error(e, "Failed to load configuration object.");
                 return null;
             }
         }
