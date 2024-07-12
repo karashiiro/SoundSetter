@@ -2,14 +2,14 @@
 {
     public enum OptionKind : ulong
     {
-        PlaySoundsWhileWindowIsNotActive = 18,
+        PlaySoundsWhileWindowIsNotActive = 17,
 
         PlayMusicWhenMounted,
         EnableNormalBattleMusic,
         EnableCityStateBGM,
         PlaySystemSounds,
 
-        Master = 24,
+        Master = 23,
         Bgm,
         SoundEffects,
         Voice,
@@ -29,13 +29,13 @@
         AmbientSoundsMuted,
         PerformanceMuted,
 
-        PlaySoundsWhileWindowIsNotActiveBGM = 44,
+        PlaySoundsWhileWindowIsNotActiveBGM = 43,
         PlaySoundsWhileWindowIsNotActiveSoundEffects,
         PlaySoundsWhileWindowIsNotActiveVoice,
         PlaySoundsWhileWindowIsNotActiveSystemSounds,
         PlaySoundsWhileWindowIsNotActiveAmbientSounds,
         PlaySoundsWhileWindowIsNotActivePerformance,
 
-        EqualizerMode = 50,
+        EqualizerMode = 49,
     }
 }
