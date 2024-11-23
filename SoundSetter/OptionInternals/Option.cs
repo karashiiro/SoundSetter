@@ -4,25 +4,21 @@ using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
-    public abstract class Option<TManagedValue> where TManagedValue : struct
+    public abstract class Option<TManagedValue>(IPluginLog log)
+        where TManagedValue : struct
     {
-        public OptionKind Kind { get; set; }
-        public nint BaseAddress { get; set; }
-        public int Offset { get; set; }
-        public string CfgSection { get; set; }
-        public string CfgSetting { get; set; }
-        public Action<ExpandoObject> OnChange { get; set; }
-        public SetOptionDelegate SetFunction { get; set; }
+        public OptionKind Kind { get; init; }
+        public nint BaseAddress { get; init; }
+        public int Offset { get; init; }
+        public required string CfgSection { get; init; }
+        public string? CfgSetting { get; init; }
+        public Action<ExpandoObject>? OnChange { get; init; }
+        public required SetOptionDelegate SetFunction { get; init; }
 
-        protected IPluginLog Log { get; }
+        protected IPluginLog Log { get; } = log;
 
         public abstract TManagedValue GetValue();
         public abstract void SetValue(TManagedValue value);
-
-        protected Option(IPluginLog log)
-        {
-            Log = log;
-        }
 
         protected void NotifyOptionChanged(TManagedValue value)
         {

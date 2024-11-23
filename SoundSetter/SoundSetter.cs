@@ -1,16 +1,13 @@
 ﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using SoundSetter.Attributes;
 using SoundSetter.OptionInternals;
 using System;
 using System.Linq;
 using System.Text;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
@@ -52,7 +49,7 @@ namespace SoundSetter
             this.keyState = keyState;
             this.log = log;
 
-            this.config = (Configuration)this.pluginInterface.GetPluginConfig() ?? new Configuration();
+            this.config = (Configuration?)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
             this.vc = new VolumeControls(sigScanner, gameinterop, log, null); // TODO: restore IPC
@@ -211,8 +208,8 @@ namespace SoundSetter
                 args);
         }
 
-        private void DoCommand(string command, string optName, string errorMessage, BooleanOption boolOpt,
-            ByteOption varOpt, string args)
+        private void DoCommand(string command, string optName, string errorMessage, BooleanOption? boolOpt,
+            ByteOption? varOpt, string args)
         {
             ParseAdjustArgs(args, out var op, out var targetStr);
 
@@ -245,7 +242,10 @@ namespace SoundSetter
                 }
 
                 VolumeControls.AdjustVolume(varOpt, volumeTarget, op);
-                this.chatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
+                if (varOpt != null)
+                {
+                    this.chatGui.Print($"{optName} volume set to {varOpt.GetValue()}.");
+                }
             }
             catch (InvalidOperationException e)
             {

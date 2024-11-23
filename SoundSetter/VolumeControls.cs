@@ -10,53 +10,53 @@ namespace SoundSetter
 {
     public class VolumeControls : IDisposable
     {
-        private readonly Hook<SetOptionDelegate> setOptionHook;
-        private readonly Action<ExpandoObject> onChange;
+        private readonly Hook<SetOptionDelegate>? setOptionHook;
+        private readonly Action<ExpandoObject>? onChange;
         private readonly OptionOffsets offsets;
         private readonly IPluginLog log;
 
         public nint BaseAddress { get; private set; }
 
-        public BooleanOption PlaySoundsWhileWindowIsNotActive { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActiveBGM { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActiveSoundEffects { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActiveVoice { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActiveSystemSounds { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActiveAmbientSounds { get; private set; }
-        public BooleanOption PlaySoundsWhileWindowIsNotActivePerformance { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActive { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActiveBGM { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActiveSoundEffects { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActiveVoice { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActiveSystemSounds { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActiveAmbientSounds { get; private set; }
+        public BooleanOption? PlaySoundsWhileWindowIsNotActivePerformance { get; private set; }
 
-        public BooleanOption PlayMusicWhenMounted { get; private set; }
-        public BooleanOption EnableNormalBattleMusic { get; private set; }
-        public BooleanOption EnableCityStateBGM { get; private set; }
-        public BooleanOption PlaySystemSounds { get; private set; }
+        public BooleanOption? PlayMusicWhenMounted { get; private set; }
+        public BooleanOption? EnableNormalBattleMusic { get; private set; }
+        public BooleanOption? EnableCityStateBGM { get; private set; }
+        public BooleanOption? PlaySystemSounds { get; private set; }
 
-        public ByteOption MasterVolume { get; private set; }
-        public ByteOption Bgm { get; private set; }
-        public ByteOption SoundEffects { get; private set; }
-        public ByteOption Voice { get; private set; }
-        public ByteOption SystemSounds { get; private set; }
-        public ByteOption AmbientSounds { get; private set; }
-        public ByteOption Performance { get; private set; }
+        public ByteOption? MasterVolume { get; private set; }
+        public ByteOption? Bgm { get; private set; }
+        public ByteOption? SoundEffects { get; private set; }
+        public ByteOption? Voice { get; private set; }
+        public ByteOption? SystemSounds { get; private set; }
+        public ByteOption? AmbientSounds { get; private set; }
+        public ByteOption? Performance { get; private set; }
 
-        public ByteOption Self { get; private set; }
-        public ByteOption Party { get; private set; }
-        public ByteOption OtherPCs { get; private set; }
+        public ByteOption? Self { get; private set; }
+        public ByteOption? Party { get; private set; }
+        public ByteOption? OtherPCs { get; private set; }
 
-        public BooleanOption MasterVolumeMuted { get; private set; }
-        public BooleanOption BgmMuted { get; private set; }
-        public BooleanOption SoundEffectsMuted { get; private set; }
-        public BooleanOption VoiceMuted { get; private set; }
-        public BooleanOption SystemSoundsMuted { get; private set; }
-        public BooleanOption AmbientSoundsMuted { get; private set; }
-        public BooleanOption PerformanceMuted { get; private set; }
+        public BooleanOption? MasterVolumeMuted { get; private set; }
+        public BooleanOption? BgmMuted { get; private set; }
+        public BooleanOption? SoundEffectsMuted { get; private set; }
+        public BooleanOption? VoiceMuted { get; private set; }
+        public BooleanOption? SystemSoundsMuted { get; private set; }
+        public BooleanOption? AmbientSoundsMuted { get; private set; }
+        public BooleanOption? PerformanceMuted { get; private set; }
 
-        public EqualizerModeOption EqualizerMode { get; private set; }
+        public EqualizerModeOption? EqualizerMode { get; private set; }
 
         public VolumeControls(
             ISigScanner scanner,
             IGameInteropProvider gameInterop,
             IPluginLog log,
-            Action<ExpandoObject> onChange)
+            Action<ExpandoObject>? onChange)
         {
             this.log = log;
             this.onChange = onChange;
@@ -180,7 +180,7 @@ namespace SoundSetter
             };
         }
 
-        public static void ToggleVolume(BooleanOption option, OperationKind interaction)
+        public static void ToggleVolume(BooleanOption? option, OperationKind interaction)
         {
             if (option == null)
             {
@@ -205,7 +205,7 @@ namespace SoundSetter
             }
         }
 
-        public static void AdjustVolume(ByteOption option, int volumeTarget, OperationKind interaction)
+        public static void AdjustVolume(ByteOption? option, int volumeTarget, OperationKind interaction)
         {
             if (option == null)
             {

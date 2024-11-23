@@ -5,7 +5,7 @@ using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
-    public class ByteOption : Option<byte>
+    public class ByteOption(IPluginLog log) : Option<byte>(log)
     {
         public override byte GetValue()
         {
@@ -24,7 +24,7 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind, int, string?, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new ByteOption(log)
             {
@@ -38,10 +38,6 @@ namespace SoundSetter.OptionInternals
                 OnChange = onChange,
                 SetFunction = setFunction,
             };
-        }
-
-        public ByteOption(IPluginLog log) : base(log)
-        {
         }
     }
 }

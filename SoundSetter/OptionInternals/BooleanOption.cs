@@ -5,7 +5,7 @@ using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
-    public class BooleanOption : Option<bool>
+    public class BooleanOption(IPluginLog log) : Option<bool>(log)
     {
         public bool Hack { get; set; }
 
@@ -31,7 +31,7 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string, BooleanOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject> onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind, int, string?, BooleanOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new BooleanOption(log)
             {
@@ -46,10 +46,6 @@ namespace SoundSetter.OptionInternals
                 
                 SetFunction = setFunction,
             };
-        }
-
-        public BooleanOption(IPluginLog log) : base(log)
-        {
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 
 namespace SoundSetter
@@ -11,7 +10,7 @@ namespace SoundSetter
     {
         private readonly string path;
 
-        public IDictionary<string, IDictionary<string, string>> Settings { get; }
+        public Dictionary<string, IDictionary<string, string>> Settings { get; }
 
         public CFG(string path)
         {
@@ -36,14 +35,14 @@ namespace SoundSetter
             File.WriteAllText(this.path, text.ToString());
         }
 
-        private static IDictionary<string, IDictionary<string, string>> ParseCfg(string text)
+        private static Dictionary<string, IDictionary<string, string>> ParseCfg(string text)
         {
             var cfg = new Dictionary<string, IDictionary<string, string>>();
             var lines = text.Split('\r', '\n');
-            string currentSection = null;
+            string? currentSection = null;
             foreach (var line in lines)
             {
-                if (line.StartsWith("<"))
+                if (line.StartsWith('<'))
                 {
                     currentSection = line[1..^1];
                     if (!cfg.ContainsKey(currentSection))
@@ -51,7 +50,7 @@ namespace SoundSetter
                         cfg.Add(currentSection, new Dictionary<string, string>());
                     }
                 }
-                else if (line.IndexOf('\t') != -1 && currentSection != null)
+                else if (line.Contains('\t') && currentSection != null)
                 {
                     var kvp = line.Split('\t');
                     var key = kvp[0];
@@ -65,7 +64,7 @@ namespace SoundSetter
             return cfg;
         }
 
-        public static CFG Load(IPluginLog log)
+        public static CFG? Load(IPluginLog log)
         {
             var path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),

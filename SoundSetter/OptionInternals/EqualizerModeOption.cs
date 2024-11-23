@@ -3,7 +3,7 @@ using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
 {
-    public class EqualizerModeOption : Option<EqualizerMode.Enum>
+    public class EqualizerModeOption(IPluginLog log) : Option<EqualizerMode.Enum>(log)
     {
         public override EqualizerMode.Enum GetValue()
         {
@@ -20,10 +20,6 @@ namespace SoundSetter.OptionInternals
             if (cfg == null) return;
             cfg.Settings[CfgSection][CfgSetting] = value.ToString();
             cfg.Save();
-        }
-
-        public EqualizerModeOption(IPluginLog log) : base(log)
-        {
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Reflection;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using Newtonsoft.Json;
 
@@ -58,7 +57,14 @@ namespace SoundSetter.OptionInternals
             using var sr = new StreamReader(s);
             var data = sr.ReadToEnd();
 
-            return JsonConvert.DeserializeObject<OptionOffsets>(data);
+            var optionOffsets = JsonConvert.DeserializeObject<OptionOffsets>(data);
+            if (optionOffsets == null)
+            {
+                log.Error("Failed to deserialize option offsets!");
+                return new OptionOffsets();
+            }
+
+            return optionOffsets;
         }
     }
 }
