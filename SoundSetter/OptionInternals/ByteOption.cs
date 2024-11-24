@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Dynamic;
-using System.Runtime.InteropServices;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter.OptionInternals
 {
@@ -9,12 +9,15 @@ namespace SoundSetter.OptionInternals
     {
         public override byte GetValue()
         {
-            return Marshal.ReadByte(BaseAddress, Offset);
+            var optionValue = GetRawValue();
+            return Convert.ToByte(optionValue.Value1);
         }
 
-        public override void SetValue(byte value)
+        public override unsafe void SetValue(byte value)
         {
-            SetFunction(BaseAddress, Kind, value, 2, 1, 1);
+            base.SetValue(value);
+
+            SetFunction(ConfigModule, Kind, value, 2, 1, 1);
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
@@ -24,11 +27,11 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string?, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static unsafe Func<OptionKind, int, string?, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new ByteOption(log)
             {
-                BaseAddress = baseAddress,
+                ConfigModule = (ConfigModule*)baseAddress,
                 Offset = offset,
                 Kind = optionKind,
                 

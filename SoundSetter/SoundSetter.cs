@@ -29,7 +29,7 @@ namespace SoundSetter
         private readonly SoundSetterUI ui;
         private readonly VolumeControls vc;
 
-        public string Name => "SoundSetter";
+        public static string Name => "SoundSetter";
 
         public SoundSetter(
             IDalamudPluginInterface pluginInterface,
@@ -69,9 +69,6 @@ namespace SoundSetter
 
         private void OnTick()
         {
-            // We don't want to open the UI before the player loads, that leaves the options uninitialized.
-            if (this.clientState.LocalContentId == 0) return;
-
             var cutsceneActive = this.condition[ConditionFlag.OccupiedInCutSceneEvent] ||
                                  this.condition[ConditionFlag.WatchingCutscene] ||
                                  this.condition[ConditionFlag.WatchingCutscene78];

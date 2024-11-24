@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
 using Dalamud.Plugin.Services;
 
 namespace SoundSetter.OptionInternals
@@ -7,12 +7,15 @@ namespace SoundSetter.OptionInternals
     {
         public override EqualizerMode.Enum GetValue()
         {
-            return (EqualizerMode.Enum)Marshal.ReadByte(BaseAddress, Offset);
+            var optionValue = GetRawValue();
+            return (EqualizerMode.Enum)Convert.ToByte(optionValue.Value1);
         }
 
-        public override void SetValue(EqualizerMode.Enum value)
+        public override unsafe void SetValue(EqualizerMode.Enum value)
         {
-            SetFunction(BaseAddress, Kind, (byte)value, 2, 1, 1);
+            base.SetValue(value);
+
+            SetFunction(ConfigModule, Kind, (byte)value, 2, 1, 1);
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;

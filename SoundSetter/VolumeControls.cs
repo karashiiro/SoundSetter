@@ -5,17 +5,35 @@ using SoundSetter.OptionInternals;
 using System;
 using System.Dynamic;
 using System.Runtime.InteropServices;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter
 {
     public class VolumeControls : IDisposable
     {
-        private readonly Hook<SetOptionDelegate>? setOptionHook;
+        private static class Signatures
+        {
+            public const string SetOption =
+                "89 54 24 10 53 55 57 41 55 41 56 41 57 48 83 EC ?? 32 C0 49 63 E9 45 8B E8";
+        }
+
         private readonly Action<ExpandoObject>? onChange;
         private readonly OptionOffsets offsets;
+        private readonly IGameInteropProvider gameInterop;
         private readonly IPluginLog log;
 
-        public nint BaseAddress { get; private set; }
+        private Hook<SetOptionDelegate>? setOptionHook;
+
+        public static nint BaseAddress
+        {
+            get
+            {
+                unsafe
+                {
+                    return (nint)ConfigModule.Instance();
+                }
+            }
+        }
 
         public BooleanOption? PlaySoundsWhileWindowIsNotActive { get; private set; }
         public BooleanOption? PlaySoundsWhileWindowIsNotActiveBGM { get; private set; }
@@ -58,43 +76,40 @@ namespace SoundSetter
             IPluginLog log,
             Action<ExpandoObject>? onChange)
         {
+            this.gameInterop = gameInterop;
             this.log = log;
             this.onChange = onChange;
             this.offsets = OptionOffsets.Load(log);
 
-            try
+            if (scanner.TryScanText(Signatures.SetOption, out var setOptionPtr))
             {
-                // I thought I'd need the user to change the settings manually once to get the base address,
-                // but the function is automatically called once when the player is initialized, so I'll settle for that.
-                // Note to self: Cheat Engine's "Select current function" tool is unreliable, don't waste time with it.
-                // This signature is probably stable, but the option struct offsets need to be updated after some patches.
-                var setConfigurationPtr =
-                    scanner.ScanText(
-                        "89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
-                var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
-                this.setOptionHook = gameInterop.HookFromAddress<SetOptionDelegate>(setConfigurationPtr,
-                    (baseAddress, kind, value, unk1, unk2, unk3) =>
-                    {
-                        if (MasterVolume == null)
-                        {
-                            BaseAddress = baseAddress;
-                            InitializeOptions(setOption);
-                        }
-
-#if DEBUG
-                        log.Debug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
-#endif
-                        return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
-                    });
-                this.setOptionHook.Enable();
+                var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setOptionPtr);
+                InitializeOptionsHook(setOptionPtr);
+                InitializeOptions(setOption);
             }
-            catch (Exception e)
+            else
             {
-                log.Error($"Failed to hook configuration set method! Full error:\n{e}");
+                log.Error("Failed to hook configuration setter method!");
             }
         }
 
-        private void InitializeOptions(SetOptionDelegate setOption)
+        private unsafe void InitializeOptionsHook(nint setOptionPtr)
+        {
+            // TODO: Keep plugin UI in sync with game when config is updated - but not saved - in the game UI
+            // This requires keeping a draft of what the pending settings are, which possibly requires a
+            // sizable refactor.
+            this.setOptionHook = this.gameInterop.HookFromAddress<SetOptionDelegate>(setOptionPtr,
+                (configModule, kind, value, unk1, unk2, unk3) =>
+                {
+#if DEBUG
+                    log.Debug($"{(nint)configModule:X8}: {kind}, {value}, {unk1}, {unk2}, {unk3}");
+#endif
+                    return this.setOptionHook!.Original(configModule, kind, value, unk1, unk2, unk3);
+                });
+            this.setOptionHook.Enable();
+        }
+
+        private unsafe void InitializeOptions(SetOptionDelegate setOption)
         {
             var makeByteOption = ByteOption.CreateFactory(this.log, BaseAddress, this.onChange, "SoundPlay Settings", setOption);
             var makeBooleanOptionSoundPlay =
@@ -167,7 +182,7 @@ namespace SoundSetter
 
             EqualizerMode = new EqualizerModeOption(this.log)
             {
-                BaseAddress = BaseAddress,
+                ConfigModule = (ConfigModule*)BaseAddress,
                 Offset = this.offsets.EqualizerMode,
                 Kind = OptionKind.EqualizerMode,
 

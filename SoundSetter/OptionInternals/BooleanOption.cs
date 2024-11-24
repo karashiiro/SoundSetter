@@ -2,6 +2,7 @@
 using System.Dynamic;
 using System.Runtime.InteropServices;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter.OptionInternals
 {
@@ -11,18 +12,21 @@ namespace SoundSetter.OptionInternals
 
         public override bool GetValue()
         {
-            return Marshal.ReadByte(BaseAddress, Offset) != 0;
+            var optionValue = GetRawValue();
+            return Convert.ToByte(optionValue.Value1) != 0;
         }
 
-        public override void SetValue(bool value)
+        public override unsafe void SetValue(bool value)
         {
+            base.SetValue(value);
+
             var toWrite = value ? 1U : 0U;
-            SetFunction(BaseAddress, Kind, toWrite, 2, 1, 1);
+            SetFunction(ConfigModule, Kind, toWrite, 2, 1, 1);
             NotifyOptionChanged(value);
 
             // This is a hack to make the native text commands work as expected; do not reuse this
             // or expect it to work elsewhere.
-            if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
+            if (Hack) Marshal.WriteInt32((nint)ConfigModule, Offset - 21504, (int)toWrite);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
             var cfg = CFG.Load(Log);
@@ -31,11 +35,11 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string?, BooleanOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static unsafe Func<OptionKind, int, string?, BooleanOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new BooleanOption(log)
             {
-                BaseAddress = baseAddress,
+                ConfigModule = (ConfigModule*)baseAddress,
                 Offset = offset,
                 Kind = optionKind,
                 
