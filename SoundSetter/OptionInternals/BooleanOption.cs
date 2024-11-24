@@ -26,6 +26,7 @@ namespace SoundSetter.OptionInternals
 
             // This is a hack to make the native text commands work as expected; do not reuse this
             // or expect it to work elsewhere.
+            // TODO: Determine if this is still necessary (it'll break when offsets change again)
             if (Hack) Marshal.WriteInt32((nint)ConfigModule, Offset - 21504, (int)toWrite);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
