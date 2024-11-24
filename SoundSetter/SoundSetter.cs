@@ -1,5 +1,4 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
+﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin;
@@ -8,6 +7,7 @@ using SoundSetter.OptionInternals;
 using System;
 using System.Linq;
 using System.Text;
+using Dalamud.Game;
 using Dalamud.Plugin.Services;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
@@ -21,6 +21,7 @@ namespace SoundSetter
         private readonly ICondition condition;
         private readonly IKeyState keyState;
         private readonly IClientState clientState;
+        private readonly IFramework framework;
         private readonly IPluginLog log;
 
         private readonly PluginCommandManager<SoundSetter> commandManager;
@@ -35,11 +36,12 @@ namespace SoundSetter
             IDalamudPluginInterface pluginInterface,
             IChatGui chatGui,
             ISigScanner sigScanner,
-            IGameInteropProvider gameinterop,
+            IGameInteropProvider gameInterop,
             ICommandManager commands,
             ICondition condition,
             IClientState clientState,
             IKeyState keyState,
+            IFramework framework,
             IPluginLog log)
         {
             this.pluginInterface = pluginInterface;
@@ -47,12 +49,14 @@ namespace SoundSetter
             this.condition = condition;
             this.clientState = clientState;
             this.keyState = keyState;
+            this.framework = framework;
             this.log = log;
 
             this.config = (Configuration?)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
-            this.vc = new VolumeControls(sigScanner, gameinterop, log, null); // TODO: restore IPC
+            this.vc = new VolumeControls(sigScanner, gameInterop, log, null); // TODO: restore IPC
+            this.framework.Update += this.vc.OnTick;
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
@@ -69,9 +73,6 @@ namespace SoundSetter
 
         private void OnTick()
         {
-            // We don't want to open the UI before the player loads, that leaves the options uninitialized.
-            if (this.clientState.LocalContentId == 0) return;
-
             var cutsceneActive = this.condition[ConditionFlag.OccupiedInCutSceneEvent] ||
                                  this.condition[ConditionFlag.WatchingCutscene] ||
                                  this.condition[ConditionFlag.WatchingCutscene78];
@@ -318,6 +319,8 @@ namespace SoundSetter
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
+
+            this.framework.Update -= this.vc.OnTick;
 
             this.commandManager.Dispose();
 

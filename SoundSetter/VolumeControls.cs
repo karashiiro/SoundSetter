@@ -1,21 +1,31 @@
-﻿using Dalamud.Game;
-using Dalamud.Hooking;
-using Dalamud.Plugin.Services;
+﻿using Dalamud.Plugin.Services;
 using SoundSetter.OptionInternals;
 using System;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Runtime.InteropServices;
+using Dalamud.Game;
+using Dalamud.Hooking;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter
 {
-    public class VolumeControls : IDisposable
+    public class VolumeControls(
+        ISigScanner sigScanner,
+        IGameInteropProvider gameInterop,
+        IPluginLog log,
+        Action<ExpandoObject>? onChange) : IDisposable
     {
-        private readonly Hook<SetOptionDelegate>? setOptionHook;
-        private readonly Action<ExpandoObject>? onChange;
-        private readonly OptionOffsets offsets;
-        private readonly IPluginLog log;
+        private static class Signatures
+        {
+            public const string SetOption =
+                "89 54 24 10 53 55 57 41 55 41 56 41 57 48 83 EC ?? 32 C0 49 63 E9 45 8B E8";
+        }
 
-        public nint BaseAddress { get; private set; }
+        private readonly OptionOffsets offsets = OptionOffsets.Load(log);
+
+        private Hook<SetOptionDelegate>? setOptionHook;
+        private SetOptionDelegate? setOptionActual;
 
         public BooleanOption? PlaySoundsWhileWindowIsNotActive { get; private set; }
         public BooleanOption? PlaySoundsWhileWindowIsNotActiveBGM { get; private set; }
@@ -52,129 +62,150 @@ namespace SoundSetter
 
         public EqualizerModeOption? EqualizerMode { get; private set; }
 
-        public VolumeControls(
-            ISigScanner scanner,
-            IGameInteropProvider gameInterop,
-            IPluginLog log,
-            Action<ExpandoObject>? onChange)
+        private bool initialized;
+
+        public bool IsInitialized() => initialized;
+
+        public unsafe void OnTick(IFramework f)
         {
-            this.log = log;
-            this.onChange = onChange;
-            this.offsets = OptionOffsets.Load(log);
-
-            try
+            var configModule = ConfigModule.Instance();
+            if (!initialized && configModule != null)
             {
-                // I thought I'd need the user to change the settings manually once to get the base address,
-                // but the function is automatically called once when the player is initialized, so I'll settle for that.
-                // Note to self: Cheat Engine's "Select current function" tool is unreliable, don't waste time with it.
-                // This signature is probably stable, but the option struct offsets need to be updated after some patches.
-                var setConfigurationPtr =
-                    scanner.ScanText(
-                        "89 54 24 10 53 55 57 41 54 41 55 41 56 48 83 EC 48 8B C2 45 8B E0 44 8B D2 45 32 F6 44 8B C2 45 32 ED");
-                var setOption = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setConfigurationPtr);
-                this.setOptionHook = gameInterop.HookFromAddress<SetOptionDelegate>(setConfigurationPtr,
-                    (baseAddress, kind, value, unk1, unk2, unk3) =>
-                    {
-                        if (MasterVolume == null)
-                        {
-                            BaseAddress = baseAddress;
-                            InitializeOptions(setOption);
-                        }
-
-#if DEBUG
-                        log.Debug($"{baseAddress}, {kind}, {value}, {unk1}, {unk2}, {unk3}");
-#endif
-                        return this.setOptionHook!.Original(baseAddress, kind, value, unk1, unk2, unk3);
-                    });
-                this.setOptionHook.Enable();
+                initialized = true;
+                InitializeFramework(configModule);
             }
-            catch (Exception e)
+        }
+
+        private unsafe void InitializeFramework(ConfigModule* configModule)
+        {
+            // Grab the configuration option setter used by the UI
+            if (sigScanner.TryScanText(Signatures.SetOption, out var setOptionPtr))
             {
-                log.Error($"Failed to hook configuration set method! Full error:\n{e}");
+                this.setOptionActual = Marshal.GetDelegateForFunctionPointer<SetOptionDelegate>(setOptionPtr);
+                LogUIChanges(setOptionPtr);
+            }
+            else
+            {
+                log.Error("Failed to hook configuration setter method!");
+            }
+
+            // InitializeOptions(this.setOptionActual);
+            InitializeOptions((_, kind, value, _, _, _) =>
+            {
+                var configEnum = OptionKind.GetConfigEnum(kind);
+                ref var optionValue1 = ref configModule->Values[(int)configEnum];
+                ref var optionValue2 = ref OptionValue.FromOptionValue(ref optionValue1);
+                optionValue2.Value1 = value;
+                return nint.Zero;
+            });
+
+            LogCurrentSettings();
+        }
+
+        [Conditional("DEBUG")]
+        private unsafe void LogUIChanges(nint setOptionPtr)
+        {
+            this.setOptionHook = gameInterop.HookFromAddress<SetOptionDelegate>(setOptionPtr,
+                (address, kind, value, unk1, unk2, unk3) =>
+                {
+                    log.Debug($"{(nint)address:X8}: {kind}, {value}, {unk1}, {unk2}, {unk3}");
+                    return this.setOptionHook!.Original(address, kind, value, unk1, unk2, unk3);
+                });
+            this.setOptionHook.Enable();
+        }
+
+        [Conditional("DEBUG")]
+        private unsafe void LogCurrentSettings()
+        {
+            var configModule = ConfigModule.Instance();
+            for (var i = 0; i < configModule->Values.Length; i++)
+            {
+                var optionValue = configModule->Values[i];
+                ref var rawValue = ref OptionValue.FromOptionValue(ref optionValue);
+                log.Info($"{(nint)configModule:X8}: {(OptionKind.ConfigEnum)i}, {rawValue.Value1}, {rawValue.Value2}");
             }
         }
 
         private void InitializeOptions(SetOptionDelegate setOption)
         {
-            var makeByteOption = ByteOption.CreateFactory(this.log, BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+            var makeByteOption = ByteOption.CreateFactory(log, onChange, "SoundPlay Settings", setOption);
             var makeBooleanOptionSoundPlay =
-                BooleanOption.CreateFactory(this.log, BaseAddress, this.onChange, "SoundPlay Settings", setOption);
+                BooleanOption.CreateFactory(log, onChange, "SoundPlay Settings", setOption);
             var makeBooleanOptionSoundSettings =
-                BooleanOption.CreateFactory(this.log, BaseAddress, this.onChange, "Sound Settings", setOption);
+                BooleanOption.CreateFactory(log, onChange, "Sound Settings", setOption);
 
             PlaySoundsWhileWindowIsNotActive = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActive, this.offsets.PlaySoundsWhileWindowIsNotActive,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActive, this.offsets.PlaySoundsWhileWindowIsNotActive,
                 "IsSoundAlways");
             PlaySoundsWhileWindowIsNotActiveBGM = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActiveBGM, this.offsets.PlaySoundsWhileWindowIsNotActiveBGM,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActiveBGM, this.offsets.PlaySoundsWhileWindowIsNotActiveBGM,
                 "IsSoundBgmAlways");
             PlaySoundsWhileWindowIsNotActiveSoundEffects = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActiveSoundEffects,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActiveSoundEffects,
                 this.offsets.PlaySoundsWhileWindowIsNotActiveSoundEffects, "IsSoundSeAlways");
             PlaySoundsWhileWindowIsNotActiveVoice = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActiveVoice, this.offsets.PlaySoundsWhileWindowIsNotActiveVoice,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActiveVoice, this.offsets.PlaySoundsWhileWindowIsNotActiveVoice,
                 "IsSoundVoiceAlways");
             PlaySoundsWhileWindowIsNotActiveSystemSounds = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActiveSystemSounds,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActiveSystemSounds,
                 this.offsets.PlaySoundsWhileWindowIsNotActiveSystemSounds, "IsSoundSystemAlways");
             PlaySoundsWhileWindowIsNotActiveAmbientSounds = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActiveAmbientSounds,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActiveAmbientSounds,
                 this.offsets.PlaySoundsWhileWindowIsNotActiveAmbientSounds, "IsSoundEnvAlways");
             PlaySoundsWhileWindowIsNotActivePerformance = makeBooleanOptionSoundSettings(
-                OptionKind.PlaySoundsWhileWindowIsNotActivePerformance,
+                OptionKind.UIEnum.PlaySoundsWhileWindowIsNotActivePerformance,
                 this.offsets.PlaySoundsWhileWindowIsNotActivePerformance, "IsSoundPerformAlways");
 
             PlayMusicWhenMounted =
-                makeBooleanOptionSoundPlay(OptionKind.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
-            EnableNormalBattleMusic = makeBooleanOptionSoundPlay(OptionKind.EnableNormalBattleMusic,
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.PlayMusicWhenMounted, this.offsets.PlayMusicWhenMounted, null);
+            EnableNormalBattleMusic = makeBooleanOptionSoundPlay(OptionKind.UIEnum.EnableNormalBattleMusic,
                 this.offsets.EnableNormalBattleMusic, null);
             EnableCityStateBGM =
-                makeBooleanOptionSoundPlay(OptionKind.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.EnableCityStateBGM, this.offsets.EnableCityStateBGM, null);
             PlaySystemSounds =
-                makeBooleanOptionSoundPlay(OptionKind.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.PlaySystemSounds, this.offsets.PlaySystemSounds, null);
 
-            MasterVolume = makeByteOption(OptionKind.Master, this.offsets.MasterVolume, "SoundMaster");
-            Bgm = makeByteOption(OptionKind.Bgm, this.offsets.Bgm, "SoundBgm");
-            SoundEffects = makeByteOption(OptionKind.SoundEffects, this.offsets.SoundEffects, "SoundSe");
-            Voice = makeByteOption(OptionKind.Voice, this.offsets.Voice, "SoundVoice");
-            SystemSounds = makeByteOption(OptionKind.SystemSounds, this.offsets.SystemSounds, "SoundSystem");
-            AmbientSounds = makeByteOption(OptionKind.AmbientSounds, this.offsets.AmbientSounds, "SoundEnv");
-            Performance = makeByteOption(OptionKind.Performance, this.offsets.Performance, "SoundPerform");
+            MasterVolume = makeByteOption(OptionKind.UIEnum.Master, this.offsets.MasterVolume, "SoundMaster");
+            Bgm = makeByteOption(OptionKind.UIEnum.Bgm, this.offsets.Bgm, "SoundBgm");
+            SoundEffects = makeByteOption(OptionKind.UIEnum.SoundEffects, this.offsets.SoundEffects, "SoundSe");
+            Voice = makeByteOption(OptionKind.UIEnum.Voice, this.offsets.Voice, "SoundVoice");
+            SystemSounds = makeByteOption(OptionKind.UIEnum.SystemSounds, this.offsets.SystemSounds, "SoundSystem");
+            AmbientSounds = makeByteOption(OptionKind.UIEnum.AmbientSounds, this.offsets.AmbientSounds, "SoundEnv");
+            Performance = makeByteOption(OptionKind.UIEnum.Performance, this.offsets.Performance, "SoundPerform");
 
-            Self = makeByteOption(OptionKind.Self, this.offsets.Self, "SoundPlayer");
-            Party = makeByteOption(OptionKind.Party, this.offsets.Party, "SoundParty");
-            OtherPCs = makeByteOption(OptionKind.OtherPCs, this.offsets.OtherPCs, "SoundOther");
+            Self = makeByteOption(OptionKind.UIEnum.Self, this.offsets.Self, "SoundPlayer");
+            Party = makeByteOption(OptionKind.UIEnum.Party, this.offsets.Party, "SoundParty");
+            OtherPCs = makeByteOption(OptionKind.UIEnum.OtherPCs, this.offsets.OtherPCs, "SoundOther");
 
             MasterVolumeMuted =
-                makeBooleanOptionSoundPlay(OptionKind.MasterMuted, this.offsets.MasterVolumeMuted, "IsSndMaster");
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.MasterMuted, this.offsets.MasterVolumeMuted, "IsSndMaster");
             MasterVolumeMuted.Hack = true;
-            BgmMuted = makeBooleanOptionSoundPlay(OptionKind.BgmMuted, this.offsets.BgmMuted, "IsSndBgm");
+            BgmMuted = makeBooleanOptionSoundPlay(OptionKind.UIEnum.BgmMuted, this.offsets.BgmMuted, "IsSndBgm");
             BgmMuted.Hack = true;
             SoundEffectsMuted =
-                makeBooleanOptionSoundPlay(OptionKind.SoundEffectsMuted, this.offsets.SoundEffectsMuted, "IsSndSe");
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.SoundEffectsMuted, this.offsets.SoundEffectsMuted, "IsSndSe");
             SoundEffectsMuted.Hack = true;
-            VoiceMuted = makeBooleanOptionSoundPlay(OptionKind.VoiceMuted, this.offsets.VoiceMuted, "IsSndVoice");
+            VoiceMuted = makeBooleanOptionSoundPlay(OptionKind.UIEnum.VoiceMuted, this.offsets.VoiceMuted, "IsSndVoice");
             VoiceMuted.Hack = true;
-            SystemSoundsMuted = makeBooleanOptionSoundPlay(OptionKind.SystemSoundsMuted, this.offsets.SystemSoundsMuted,
+            SystemSoundsMuted = makeBooleanOptionSoundPlay(OptionKind.UIEnum.SystemSoundsMuted, this.offsets.SystemSoundsMuted,
                 "IsSndSystem");
             SystemSoundsMuted.Hack = true;
             AmbientSoundsMuted =
-                makeBooleanOptionSoundPlay(OptionKind.AmbientSoundsMuted, this.offsets.AmbientSoundsMuted, "IsSndEnv");
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.AmbientSoundsMuted, this.offsets.AmbientSoundsMuted, "IsSndEnv");
             AmbientSoundsMuted.Hack = true;
             PerformanceMuted =
-                makeBooleanOptionSoundPlay(OptionKind.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
+                makeBooleanOptionSoundPlay(OptionKind.UIEnum.PerformanceMuted, this.offsets.PerformanceMuted, "IsSndPerform");
             PerformanceMuted.Hack = true;
 
-            EqualizerMode = new EqualizerModeOption(this.log)
+            EqualizerMode = new EqualizerModeOption(log)
             {
-                BaseAddress = BaseAddress,
                 Offset = this.offsets.EqualizerMode,
-                Kind = OptionKind.EqualizerMode,
+                Kind = OptionKind.UIEnum.EqualizerMode,
 
                 CfgSection = "SoundPlay Settings",
                 CfgSetting = "SoundEqualizerType",
 
-                OnChange = this.onChange,
+                OnChange = onChange,
 
                 SetFunction = setOption,
             };

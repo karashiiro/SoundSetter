@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Dynamic;
-using System.Runtime.InteropServices;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter.OptionInternals
 {
@@ -9,20 +9,24 @@ namespace SoundSetter.OptionInternals
     {
         public bool Hack { get; set; }
 
-        public override bool GetValue()
+        public override unsafe bool GetValue()
         {
-            return Marshal.ReadByte(BaseAddress, Offset) != 0;
+            var configModule = ConfigModule.Instance();
+            var configEnum = OptionKind.GetConfigEnum(Kind);
+            ref var optionValue1 = ref configModule->Values[(int)configEnum];
+            ref var optionValue2 = ref OptionValue.FromOptionValue(ref optionValue1);
+            return Convert.ToByte(optionValue2.Value1) != 0;
         }
 
-        public override void SetValue(bool value)
+        public override unsafe void SetValue(bool value)
         {
             var toWrite = value ? 1U : 0U;
-            SetFunction(BaseAddress, Kind, toWrite, 2, 1, 1);
+            SetFunction(ConfigModule.Instance(), Kind, toWrite, 2, 1, 1);
             NotifyOptionChanged(value);
 
             // This is a hack to make the native text commands work as expected; do not reuse this
             // or expect it to work elsewhere.
-            if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
+            // if (Hack) Marshal.WriteInt32(BaseAddress, Offset - 21504, (int)toWrite);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
             var cfg = CFG.Load(Log);
@@ -31,11 +35,10 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string?, BooleanOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind.UIEnum, int, string?, BooleanOption> CreateFactory(IPluginLog log, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new BooleanOption(log)
             {
-                BaseAddress = baseAddress,
                 Offset = offset,
                 Kind = optionKind,
                 

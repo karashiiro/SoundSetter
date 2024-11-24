@@ -21,13 +21,7 @@ namespace SoundSetter
             this.config = config;
         }
 
-        /**
-         * isInitialized seems to be true after reloading the plugin
-         * for a single frame. The first time twice is incremented is
-         * the plugin load frame, and the second time twice is incremented
-         * is after initialization.
-         */
-        private int twice = 0;
+        private bool once;
 
         /**
          * Returns the appropriate window flags to allow the user to resize
@@ -40,15 +34,9 @@ namespace SoundSetter
          */
         private ImGuiWindowFlags GetWindowFlags()
         {
-            var isInitialized = this.vc.BaseAddress != nint.Zero;
-            if (!isInitialized)
+            if (!this.once)
             {
-                return ImGuiWindowFlags.AlwaysAutoResize;
-            }
-
-            if (this.twice != 2)
-            {
-                this.twice++;
+                this.once = true;
                 return ImGuiWindowFlags.AlwaysAutoResize;
             }
 
@@ -64,14 +52,9 @@ namespace SoundSetter
             ImGui.Begin("SoundSetter Configuration", ref pVisible, GetWindowFlags());
             IsVisible = pVisible;
 
-            var isInitialized = this.vc.BaseAddress != nint.Zero;
-            if (isInitialized)
+            if (this.vc.IsInitialized())
             {
                 Settings();
-            }
-            else
-            {
-                Fail();
             }
 
             ImGui.End();
@@ -340,12 +323,6 @@ namespace SoundSetter
             {
                 this.vc.EqualizerMode.SetValue((EqualizerMode.Enum)eqMode);
             }
-        }
-
-        private static void Fail()
-        {
-            ImGui.Text(
-                "This appears to be your first installation of this plugin (or you reloaded all of your plugins).\nPlease manually change a volume setting once in order to initialize the plugin.");
         }
 
         private static string VolumeButtonName(bool state, string internalName)

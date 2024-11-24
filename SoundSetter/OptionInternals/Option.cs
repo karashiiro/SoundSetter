@@ -7,8 +7,7 @@ namespace SoundSetter.OptionInternals
     public abstract class Option<TManagedValue>(IPluginLog log)
         where TManagedValue : struct
     {
-        public OptionKind Kind { get; init; }
-        public nint BaseAddress { get; init; }
+        public OptionKind.UIEnum Kind { get; init; }
         public int Offset { get; init; }
         public required string CfgSection { get; init; }
         public string? CfgSetting { get; init; }

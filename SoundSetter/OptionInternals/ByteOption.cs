@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Dynamic;
-using System.Runtime.InteropServices;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter.OptionInternals
 {
     public class ByteOption(IPluginLog log) : Option<byte>(log)
     {
-        public override byte GetValue()
+        public override unsafe byte GetValue()
         {
-            return Marshal.ReadByte(BaseAddress, Offset);
+            var configModule = ConfigModule.Instance();
+            var configEnum = OptionKind.GetConfigEnum(Kind);
+            ref var optionValue1 = ref configModule->Values[(int)configEnum];
+            ref var optionValue2 = ref OptionValue.FromOptionValue(ref optionValue1);
+            return Convert.ToByte(optionValue2.Value1);
         }
 
-        public override void SetValue(byte value)
+        public override unsafe void SetValue(byte value)
         {
-            SetFunction(BaseAddress, Kind, value, 2, 1, 1);
+            SetFunction(ConfigModule.Instance(), Kind, value, 2, 1, 1);
             NotifyOptionChanged(value);
 
             if (string.IsNullOrEmpty(CfgSetting)) return;
@@ -24,11 +28,10 @@ namespace SoundSetter.OptionInternals
             cfg.Save();
         }
 
-        public static Func<OptionKind, int, string?, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
+        public static Func<OptionKind.UIEnum, int, string?, ByteOption> CreateFactory(IPluginLog log, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
         {
             return (optionKind, offset, cfgSetting) => new ByteOption(log)
             {
-                BaseAddress = baseAddress,
                 Offset = offset,
                 Kind = optionKind,
                 
