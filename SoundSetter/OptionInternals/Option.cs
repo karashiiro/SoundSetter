@@ -10,6 +10,12 @@ namespace SoundSetter.OptionInternals
     {
         public OptionKind Kind { get; init; }
         public unsafe ConfigModule* ConfigModule { get; init; }
+        /// <summary>
+        /// I'm like 99% sure we don't need this or Offsets.json for anything anymore now that we
+        /// rely directly on ConfigModule and it trips me up every single patch.
+        ///
+        /// TODO: Remove this? BooleanOption.SetValue still reads it but I'm almost certain the code does nothing now.
+        /// </summary>
         public int Offset { get; init; }
         public required string CfgSection { get; init; }
         public string? CfgSetting { get; init; }
