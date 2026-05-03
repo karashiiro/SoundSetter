@@ -1,5 +1,4 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
+﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin;
@@ -35,8 +34,7 @@ namespace SoundSetter
         public SoundSetter(
             IDalamudPluginInterface pluginInterface,
             IChatGui chatGui,
-            ISigScanner sigScanner,
-            IGameInteropProvider gameinterop,
+            IGameConfig gameConfig,
             ICommandManager commands,
             ICondition condition,
             IClientState clientState,
@@ -53,7 +51,7 @@ namespace SoundSetter
             this.config = (Configuration?)this.pluginInterface.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(this.pluginInterface);
 
-            this.vc = new VolumeControls(sigScanner, gameinterop, log, null); // TODO: restore IPC
+            this.vc = new VolumeControls(gameConfig, log);
 
             this.pluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 

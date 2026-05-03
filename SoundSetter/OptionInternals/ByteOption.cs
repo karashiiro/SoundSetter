@@ -1,7 +1,5 @@
-﻿using System;
-using System.Dynamic;
+﻿using Dalamud.Game.Config;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace SoundSetter.OptionInternals
 {
@@ -9,38 +7,13 @@ namespace SoundSetter.OptionInternals
     {
         public override byte GetValue()
         {
-            var optionValue = GetRawValue();
-            return Convert.ToByte(optionValue.Value1);
+            return GameConfig.TryGet(ConfigOption, out uint value) ? (byte)value : (byte)0;
         }
 
-        public override unsafe void SetValue(byte value)
+        public override void SetValue(byte value)
         {
-            base.SetValue(value);
-
-            SetFunction(ConfigModule, Kind, value, 2, 1, 1);
-            NotifyOptionChanged(value);
-
-            if (string.IsNullOrEmpty(CfgSetting)) return;
-            var cfg = CFG.Load(Log);
-            if (cfg == null) return;
-            cfg.Settings[CfgSection][CfgSetting] = value.ToString();
-            cfg.Save();
-        }
-
-        public static unsafe Func<OptionKind, int, string?, ByteOption> CreateFactory(IPluginLog log, nint baseAddress, Action<ExpandoObject>? onChange, string cfgSection, SetOptionDelegate setFunction)
-        {
-            return (optionKind, offset, cfgSetting) => new ByteOption(log)
-            {
-                ConfigModule = (ConfigModule*)baseAddress,
-                Offset = offset,
-                Kind = optionKind,
-                
-                CfgSection = cfgSection,
-                CfgSetting = cfgSetting,
-                
-                OnChange = onChange,
-                SetFunction = setFunction,
-            };
+            GameConfig.Set(ConfigOption, (uint)value);
+            PersistToCfg(value.ToString());
         }
     }
 }
